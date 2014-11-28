@@ -1,4 +1,6 @@
-package com.example.focustimer;
+package com.tomaz.focustimer;
+
+import com.example.focustimer.R;
 
 import android.app.Activity;
 import android.app.ActionBar;
