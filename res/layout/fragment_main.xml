@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ProgressWheel="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -6,6 +7,32 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.tomaz.focustimer.MainActivity$PlaceholderFragment" >
+    tools:context="com.tomaz.focustimer.MainFragment" >
+
+    <com.tomaz.focustimer.components.progressbar.ProgressWheel
+        android:id="@+id/pw_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+		android:paddingLeft="60dp"
+		android:paddingRight="60dp"
+		android:paddingTop="70dp"
+        android:layout_centerHorizontal="true"
+        ProgressWheel:barColor="#0097D6"
+        ProgressWheel:barLength="60dp"
+        ProgressWheel:barWidth="3dp"
+        ProgressWheel:rimColor="#330097D6"
+        ProgressWheel:rimWidth="2dp"
+        ProgressWheel:text="Authenticating..."
+        ProgressWheel:textColor="#222"
+        ProgressWheel:textSize="14sp" />
+
+    <Button
+        android:id="@+id/btn_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/pw_spinner"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="38dp"
+        android:text="Button" />
 
 </RelativeLayout>

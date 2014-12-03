@@ -1,16 +1,23 @@
 package com.tomaz.focustimer;
 
 import com.tomaz.focustimer.R;
+import com.tomaz.focustimer.components.progressbar.ProgressWheel;
 
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.os.Build;
 
 public class MainActivity extends Activity {
@@ -21,7 +28,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		if (savedInstanceState == null) {
 			getFragmentManager().beginTransaction()
-					.add(R.id.container, new PlaceholderFragment()).commit();
+					.add(R.id.container, new MainFragment()).commit();
 		}
 	}
 
@@ -47,17 +54,64 @@ public class MainActivity extends Activity {
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
-	public static class PlaceholderFragment extends Fragment {
+	public static class MainFragment extends Fragment {
 
-		public PlaceholderFragment() {
-		}
-
+		private ProgressWheel pw_spinner;
+		private Button btn_test;
+		private Handler timer = new Handler();
+		private Runnable increaseProgress;
+		private static final String tag = "MainFragment";
+		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			View rootView = inflater.inflate(R.layout.fragment_main, container,
+			View view = inflater.inflate(R.layout.fragment_main, container,
 					false);
-			return rootView;
+
+			pw_spinner = (ProgressWheel) view.findViewById(R.id.pw_spinner);
+			pw_spinner.setBarLength(0);
+			
+			
+			increaseProgress = new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					Log.d(tag,"increse progress");
+					pw_spinner.incrementProgress();
+					timer.postDelayed(this, 60*1000/360);
+				}
+			};
+			
+			
+			btn_test = (Button) view.findViewById(R.id.btn_add);
+			btn_test.setText("Test");
+			
+			
+			btn_test.setOnTouchListener(new OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					if(event.getAction() == MotionEvent.ACTION_DOWN){
+						Log.d(tag, "onDown start spinning");
+						pw_spinner.spin();
+						increaseProgress.run();
+					}
+					
+					if(event.getAction() == MotionEvent.ACTION_UP){
+						Log.d(tag, "onUp stop spinning");
+						pw_spinner.stopSpinning();
+						timer.removeCallbacks(increaseProgress);
+					}
+					
+					return false;
+				}
+			});
+			
+			
+			return view;
 		}
 	}
+	
+	
 }
