@@ -33,17 +33,27 @@ public class TimerService extends Service {
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
+	
+	
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		Log.d(tag, "on Create");
+	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-
+		Log.d(tag,"onStartCommand");
 		if (intent != null) {
 			Bundle bundle = intent.getExtras();
 			if (bundle != null) {
 				secToCount = bundle.getInt(KEY_TIMES_TO_COUNT);
+				startCount();
 			}else{
 				Log.d(tag,"bundle is null");
 			}
+		}else{
+			Log.d(tag, "intent is null");
 		}
 		return START_NOT_STICKY;
 	}
@@ -61,18 +71,18 @@ public class TimerService extends Service {
 	private void contorlViews(int sec){
 		if(sec <= 0){
 			// times up
-			Log.d(tag,"times up");
 			stopCount();
 			doWhenTimesUp();
 		}else{
 			// keep counting
-			Log.d(tag, msg))
+			Log.d(tag, "now : "+secToCount);
 			// TODO
 		}
 	}
 	
 	private void doWhenTimesUp(){
 		// TODO 
+		Log.d(tag,"times up");
 	}
 	
 	

@@ -2,10 +2,12 @@ package com.tomaz.focustimer;
 
 import com.tomaz.focustimer.R;
 import com.tomaz.focustimer.components.progressbar.ProgressWheel;
+import com.tomaz.focustimer.service.TimerService;
 
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -61,6 +63,7 @@ public class MainActivity extends Activity {
 		private Handler timer = new Handler();
 		private Runnable increaseProgress;
 		private static final String tag = "MainFragment";
+		private static boolean isTesting = false;
 		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -87,24 +90,52 @@ public class MainActivity extends Activity {
 			btn_test = (Button) view.findViewById(R.id.btn_add);
 			btn_test.setText("Test");
 			
+//			
+//			btn_test.setOnTouchListener(new OnTouchListener() {
+//				
+//				@Override
+//				public boolean onTouch(View v, MotionEvent event) {
+//					if(event.getAction() == MotionEvent.ACTION_DOWN){
+//						Log.d(tag, "onDown start spinning");
+//						pw_spinner.spin();
+//						increaseProgress.run();
+//					}
+//					
+//					if(event.getAction() == MotionEvent.ACTION_UP){
+//						Log.d(tag, "onUp stop spinning");
+//						pw_spinner.stopSpinning();
+//						timer.removeCallbacks(increaseProgress);
+//					}
+//					
+//					return false;
+//				}
+//			});
 			
-			btn_test.setOnTouchListener(new OnTouchListener() {
+			
+			btn_test.setOnClickListener(new OnClickListener() {
 				
 				@Override
-				public boolean onTouch(View v, MotionEvent event) {
-					if(event.getAction() == MotionEvent.ACTION_DOWN){
-						Log.d(tag, "onDown start spinning");
-						pw_spinner.spin();
-						increaseProgress.run();
+				public void onClick(View v) {
+					if(isTesting){
+						// test off
+						Log.d(tag,"test off");
+						Intent stopServiceIntent = new Intent(getActivity(),TimerService.class);
+						getActivity().stopService(stopServiceIntent);
+						
+						isTesting = false;
+						btn_test.setText("Test");
+					}else{
+						// test on
+						Log.d(tag,"test on");
+						Intent startServiceIntent = new Intent(getActivity(),TimerService.class);
+						Bundle bundle = new Bundle();
+						bundle.putInt(TimerService.KEY_TIMES_TO_COUNT, 30);
+						startServiceIntent.putExtras(bundle);
+						getActivity().startService(startServiceIntent);
+						
+						isTesting = true;
+						btn_test.setText("OFF");
 					}
-					
-					if(event.getAction() == MotionEvent.ACTION_UP){
-						Log.d(tag, "onUp stop spinning");
-						pw_spinner.stopSpinning();
-						timer.removeCallbacks(increaseProgress);
-					}
-					
-					return false;
 				}
 			});
 			
