@@ -9,30 +9,73 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.tomaz.focustimer.MainFragment" >
 
-    <com.tomaz.focustimer.components.progressbar.ProgressWheel
-        android:id="@+id/pw_spinner"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-		android:paddingLeft="60dp"
-		android:paddingRight="60dp"
-		android:paddingTop="70dp"
-        android:layout_centerHorizontal="true"
-        ProgressWheel:barColor="#0097D6"
-        ProgressWheel:barLength="60dp"
-        ProgressWheel:barWidth="3dp"
-        ProgressWheel:rimColor="#330097D6"
-        ProgressWheel:rimWidth="2dp"
-        ProgressWheel:text="Authenticating..."
-        ProgressWheel:textColor="#222"
-        ProgressWheel:textSize="14sp" />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
 
-    <Button
-        android:id="@+id/btn_add"
+        <com.tomaz.focustimer.components.progressbar.ProgressWheel
+            android:id="@+id/pw_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            ProgressWheel:barColor="#0097D6"
+            ProgressWheel:barLength="60dp"
+            ProgressWheel:barWidth="3dp"
+            ProgressWheel:rimColor="#330097D6"
+            ProgressWheel:rimWidth="2dp"
+            ProgressWheel:text="Authenticating..."
+            ProgressWheel:textColor="#222"
+            ProgressWheel:textSize="14sp"
+            android:paddingLeft="60dp"
+            android:paddingRight="60dp"
+            android:paddingTop="70dp" />
+
+        <TextView
+            android:id="@+id/txt_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="00:00"
+            android:textSize="40sp"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    </FrameLayout>
+
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/pw_spinner"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="38dp"
-        android:text="Button" />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" >
+
+        <Button
+            android:id="@+id/btn_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Start" />
+
+        <LinearLayout
+            android:id="@+id/view_fNs"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:visibility="gone" >
+
+            <Button
+                android:id="@+id/btn_pauseAndResume"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pause" />
+
+            <Button
+                android:id="@+id/btn_stop"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stop" />
+
+        </LinearLayout>
+
+    </FrameLayout>
 
 </RelativeLayout>

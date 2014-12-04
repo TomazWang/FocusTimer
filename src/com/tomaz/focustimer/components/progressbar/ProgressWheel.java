@@ -302,6 +302,15 @@ public class ProgressWheel extends View {
 	}
 
 	/**
+	 * Pause spin
+	 */
+
+	public void pauseSpinning() {
+		isSpinning = false;
+		postInvalidate();
+	}
+
+	/**
 	 * Puts the view on spin mode
 	 */
 	public void spin() {
@@ -321,20 +330,18 @@ public class ProgressWheel extends View {
 		postInvalidate();
 	}
 
-
 	/**
 	 * Increment the progress by n (of 360)
 	 */
 	public void incrementProgress(int n) {
 		isSpinning = false;
-		progress+=n;
+		progress += n;
 		if (progress > 360)
 			progress = 0;
 		// setText(Math.round(((float) progress / 360) * 100) + "%");
 		postInvalidate();
 	}
-	
-	
+
 	/**
 	 * Set the progress to a specific value
 	 */
