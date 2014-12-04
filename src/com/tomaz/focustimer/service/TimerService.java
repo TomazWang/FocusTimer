@@ -77,6 +77,7 @@ public class TimerService extends Service {
 			// times up
 			stopCount();
 			doWhenAfterTimesUp();
+			uiHandler.timeChange(sec, secTotal);
 		}else{
 			// keep counting
 			Log.d(tag, "counting : "+secToCount +" / "+ secTotal);

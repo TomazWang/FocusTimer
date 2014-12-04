@@ -32,7 +32,7 @@ import android.os.Build;
 
 public class MainActivity extends Activity {
 
-	private int secToCount = 0;
+	private int secToCount = 2 * 60;
 	private TimerService timerService;
 	private ServiceConnection connection;
 	private static final String tag = "MainActivity";
@@ -45,6 +45,7 @@ public class MainActivity extends Activity {
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new MainFragment()).commit();
 		}
+
 	}
 
 	@Override
@@ -66,6 +67,8 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	private boolean isBound = false;
+
 	/**
 	 * create and bind a TimerService and start the timer
 	 * 
@@ -74,13 +77,12 @@ public class MainActivity extends Activity {
 	 * @param uiHandler
 	 *            : the TimerUIHandler to handle time change event
 	 */
-	private void bindTimerService(int sec, TimerUIHandler uiHandler) {
+	private void bindTimerService(int sec, final TimerUIHandler uiHandler) {
 		Intent bindServiceIntent = new Intent(MainActivity.this,
 				TimerService.class);
 		Bundle bundle = new Bundle();
 		bundle.putInt(TimerService.KEY_TIMES_TO_COUNT, sec);
 		bindServiceIntent.putExtras(bundle);
-		// TODO bind the service
 
 		connection = new ServiceConnection() {
 
@@ -88,7 +90,8 @@ public class MainActivity extends Activity {
 			public void onServiceDisconnected(ComponentName name) {
 				// TODO Auto-generated method stub
 				Log.d(tag, "service disconnected");
-
+				timerService = null;
+				isBound = false;
 			}
 
 			@Override
@@ -97,15 +100,21 @@ public class MainActivity extends Activity {
 				Log.d(tag, "service connected");
 				TimerBinder binder = (TimerBinder) service;
 				timerService = binder.getService();
+				isBound = true;
+				timerService.registerUIHandler(uiHandler);
+				startTimer();
 			}
 		};
 
-		this.bindService(bindServiceIntent, connection, BIND_AUTO_CREATE);
-		timerService.registerUIHandler(uiHandler);
+		boolean isBindCall = this.bindService(bindServiceIntent, connection,
+				BIND_AUTO_CREATE);
+		Log.d(tag, "isBindcall :" + isBindCall);
 	}
 
-	private void startTiemr() {
-		timerService.startCount();
+	private void startTimer() {
+		if (isBound) {
+			timerService.startCount();
+		}
 	}
 
 	/**
@@ -117,13 +126,11 @@ public class MainActivity extends Activity {
 		return timerService.stopCount();
 	}
 
-
-	private void stopTimer(){
+	private void stopTimer() {
+		timerService.stopCount();
 		unbindService(connection);
 	}
-	
-	
-	
+
 	public int getSecToCount() {
 		return secToCount;
 	}
@@ -132,31 +139,25 @@ public class MainActivity extends Activity {
 		this.secToCount = secToCount;
 	}
 
-
-
-
-
-
-
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
 	public static class MainFragment extends Fragment {
 
+		private boolean isPauseing = false;
+
 		private ProgressWheel pw_spinner;
 		private Button btn_start;
 		private Button btn_pAndR;
 		private Button btn_stop;
-		
+
 		private TextView txt_clock;
-		
+
 		private View.OnClickListener generalOnClickListener;
-		
+
 		private TimerUIHandler uiHandler;
-		
-		
+
 		private static final String tag = "MainFragment";
-		
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -167,93 +168,82 @@ public class MainActivity extends Activity {
 			pw_spinner = (ProgressWheel) view.findViewById(R.id.pw_spinner);
 			pw_spinner.setBarLength(0);
 
-			btn_pAndR = (Button)view.findViewById(R.id.btn_pauseAndResume);
-			btn_stop = (Button)view.findViewById(R.id.btn_stop);
+			btn_pAndR = (Button) view.findViewById(R.id.btn_pauseAndResume);
+			btn_stop = (Button) view.findViewById(R.id.btn_stop);
 			btn_start = (Button) view.findViewById(R.id.btn_start);
 
-			txt_clock = (TextView)view.findViewById(R.id.txt_clock);
-			
+			txt_clock = (TextView) view.findViewById(R.id.txt_clock);
+
 			final View view_fNs = view.findViewById(R.id.view_fNs);
 
-			
 			uiHandler = new TimerUIHandler() {
-				
+
 				@Override
 				public void timeChange(int secRemain, int secTotal) {
-					// TODO Auto-generated method stub
-					int degree = (secRemain/secTotal)*360;
+
+					int degree = ((secTotal - secRemain) * 360 / secTotal);
 					pw_spinner.setProgress(degree);
-					
-					int min = secRemain/60;
-					int sec = secRemain%60;
-					
-					String sMin = (min<10)?("0"+min):(""+min);
-					String sSec = (sec<10)?("0"+sec):(""+sec);
-					
-					if(sec%2 == 0){
-						txt_clock.setText(sMin+" : "+sSec);
-					}else{
-						txt_clock.setText(sMin+"   "+sSec);
-					}
-					
+					pw_spinner.pauseSpinning();
+					Log.d(tag, "set progress =" + degree);
+
+					int min = secRemain / 60;
+					int sec = secRemain % 60;
+
+					String sMin = (min < 10) ? ("0" + min) : ("" + min);
+					String sSec = (sec < 10) ? ("0" + sec) : ("" + sec);
+
+					txt_clock.setText(sMin + " : " + sSec);
+
 				}
 			};
-			
+
 			generalOnClickListener = new OnClickListener() {
-				
+
 				@Override
 				public void onClick(View v) {
 					// TODO
-					switch(v.getId()){
+					switch (v.getId()) {
 					case R.id.btn_start:
 						view_fNs.setVisibility(View.VISIBLE);
 						btn_start.setVisibility(View.GONE);
-						((MainActivity)getActivity()).bindTimerService(((MainActivity)getActivity()).getSecToCount(), uiHandler);
-						((MainActivity)getActivity()).startTiemr();
+						((MainActivity) getActivity()).bindTimerService(
+								((MainActivity) getActivity()).getSecToCount(),
+								uiHandler);
+						// ((MainActivity) getActivity()).startTiemr();
 						pw_spinner.spin();
 						break;
-						
+
 					case R.id.btn_pauseAndResume:
-						((MainActivity)getActivity()).pauseTimer();
-						pw_spinner.pauseSpinning();
+
+						if (!isPauseing) {
+							// Pause
+							((MainActivity) getActivity()).pauseTimer();
+							pw_spinner.pauseSpinning();
+							btn_pAndR.setText("Resume");
+							isPauseing = true;
+						} else {
+							// Resume
+							((MainActivity) getActivity()).startTimer();
+							btn_pAndR.setText("Pause");
+							isPauseing = false;
+						}
 						break;
-						
+
 					case R.id.btn_stop:
 						view_fNs.setVisibility(View.GONE);
 						btn_start.setVisibility(View.VISIBLE);
-						((MainActivity)getActivity()).stopTimer();
+						((MainActivity) getActivity()).stopTimer();
 						pw_spinner.stopSpinning();
+						txt_clock.setText("00 : 00");
 						break;
-					
+
 					}
 				}
 			};
-			
+
 			btn_start.setOnClickListener(generalOnClickListener);
 			btn_stop.setOnClickListener(generalOnClickListener);
 			btn_pAndR.setOnClickListener(generalOnClickListener);
-			
-			//
-			// btn_test.setOnTouchListener(new OnTouchListener() {
-			//
-			// @Override
-			// public boolean onTouch(View v, MotionEvent event) {
-			// if(event.getAction() == MotionEvent.ACTION_DOWN){
-			// Log.d(tag, "onDown start spinning");
-			// pw_spinner.spin();
-			// increaseProgress.run();
-			// }
-			//
-			// if(event.getAction() == MotionEvent.ACTION_UP){
-			// Log.d(tag, "onUp stop spinning");
-			// pw_spinner.stopSpinning();
-			// timer.removeCallbacks(increaseProgress);
-			// }
-			//
-			// return false;
-			// }
-			// });
-
 
 			return view;
 		}
