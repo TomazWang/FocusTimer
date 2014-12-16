@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.tomaz.focustimer.exception.UIHandlerMissingException;
+import com.tomaz.focustimer.other.Sections;
 import com.tomaz.focustimer.other.TimerStates;
 
 import android.app.Activity;
@@ -76,10 +77,10 @@ public class TimerService extends Service {
 		mainTimer.removeCallbacks(countingRunnable);
 	}
 
+	
 	/*
 	 * === core timer functions ===================
 	 */
-
 	public void startCount() {
 		startForeground(FOREGROUND_NOTIFICATION_ID, buildForegroundNotification());
 		countingRunnable.run();
@@ -100,14 +101,13 @@ public class TimerService extends Service {
 			stopCount();
 			doAfterTimesUp();
 			if (callBack != null) {
-				callBack.timeChange(sec, secTotal);
+				callBack.onCounting(sec, secTotal);
 			}
 		} else {
 			// keep counting
 			Log.i(tag, "counting : " + secToCount + " / " + secTotal);
 			if (callBack != null) {
-				callBack.clockRunning();
-				callBack.timeChange(sec, secTotal);
+				callBack.onCounting(sec, secTotal);
 			}
 		}
 	}
@@ -169,10 +169,13 @@ public class TimerService extends Service {
 	}
 
 	public interface TimerCallBack {
-		void timeChange(int secRemain, int secTotal);
-
-		void clockRunning();
-
-		void stopClock();
+		void onCounting(int secRemain, int secTotal);
+		
+		/**
+		 * @return next time section.
+		 */
+		Sections onTimeUp();
+		void onPause(int secRemain,int secTotal);
+		void onDiscard();
 	}
 }
