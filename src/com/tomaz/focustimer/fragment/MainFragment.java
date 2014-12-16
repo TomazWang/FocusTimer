@@ -5,10 +5,17 @@ import com.tomaz.focustimer.R;
 import com.tomaz.focustimer.components.progressbar.ProgressWheel;
 import com.tomaz.focustimer.other.Sections;
 import com.tomaz.focustimer.other.TimerStates;
+import com.tomaz.focustimer.service.TimerService;
+import com.tomaz.focustimer.service.TimerService.TimerBinder;
 import com.tomaz.focustimer.service.TimerService.TimerCallBack;
 
 import android.app.Fragment;
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +41,14 @@ public class MainFragment extends Fragment {
 	private TimerStates timerStates = TimerStates.RESET;
 	private Sections nextSections = Sections.WORKING;
 
+	//--- service things
+	private TimerBinder timerBinder = null;
+	private ServiceConnection connection;
+	private boolean isBound = false;
+	
+	
+	
+	
 	private static final String tag = "MainFragment";
 
 	@Override
@@ -55,12 +70,48 @@ public class MainFragment extends Fragment {
 		uiHandler = new TimerCallBack() {
 
 			@Override
-			public void timeChange(int secRemain, int secTotal) {
+			public void onCounting(int secRemain, int secTotal) {
+				changeStates(TimerStates.COUNTING);
+				setClock(secRemain, secTotal);
+
+			}
+
+			@Override
+			public void onPause(int secRemain, int secTotal) {
+				changeStates(TimerStates.PAUSE);
+				setClock(secRemain, secTotal);
+			}
+
+			
+			@Override
+			public Sections onTimeUp() {
+
+				timeUp();
+				return nextSections;
+			}
+			
+			
+			@Override
+			public void onDiscard() {
+				// TODO
+			}
+			
+			
+//			@Override
+//			public void stopClock() {
+//
+//				if (isRunning) {
+//					view_fNs.setVisibility(View.GONE);
+//					btn_start.setVisibility(View.VISIBLE);
+//					isRunning = false;
+//				}
+//			}
+
+			private void setClock(int secRemain, int secTotal) {
 
 				int degree = ((secTotal - secRemain) * 360 / secTotal);
 				pw_spinner.setProgress(degree);
 				pw_spinner.pauseSpinning();
-				// Log.d(tag, "set progress =" + degree);
 
 				int min = secRemain / 60;
 				int sec = secRemain % 60;
@@ -69,40 +120,9 @@ public class MainFragment extends Fragment {
 				String sSec = (sec < 10) ? ("0" + sec) : ("" + sec);
 
 				txt_clock.setText(sMin + " : " + sSec);
-
 			}
 
-			@Override
-			public void clockRunning() {
-				if (!isRunning) {
-					view_fNs.setVisibility(View.VISIBLE);
-					btn_start.setVisibility(View.GONE);
-					isRunning = true;
-
-					btn_pAndR.setText("Pause");
-					isPauseing = false;
-				}
-			}
-
-			@Override
-			public void stopClock() {
-
-				if (isRunning) {
-					view_fNs.setVisibility(View.GONE);
-					btn_start.setVisibility(View.VISIBLE);
-					isRunning = false;
-				}
-			}
-
-			// @Override
-			// public void clockPause() {
-			// pw_spinner.pauseSpinning();
-			// btn_pAndR.setText("Resume");
-			// isPauseing = true;
-			// }
 		};
-
-		((MainActivity) getActivity()).setUiHandler(uiHandler);
 
 		generalOnClickListener = new OnClickListener() {
 
@@ -115,19 +135,30 @@ public class MainFragment extends Fragment {
 				case R.id.btn_start:
 					view_fNs.setVisibility(View.VISIBLE);
 					btn_start.setVisibility(View.GONE);
-					parent.startTimer();
-					// ((MainActivity) getActivity()).startTiemr();
+					startTimer();
 					pw_spinner.spin();
-					isRunning = true;
 					break;
 
 				case R.id.btn_pauseAndResume:
 
-					if (!isPauseing) {
-						// Pause
-						parent.pauseTimer();
+					switch(timerStates){
+					
+					
+					case COUNTING:
+						pause();
 						pw_spinner.pauseSpinning();
 						btn_pAndR.setText("Resume");
+						break;
+						
+						
+						//TODO
+					}
+					
+				
+					
+					if (timerStates == TimerStates.COUNTING) {
+						// Pause
+					
 						isPauseing = true;
 					} else {
 						// Resume
@@ -157,6 +188,54 @@ public class MainFragment extends Fragment {
 		return view;
 	}
 
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		bindService();
+	}
+	
+	private void bindService(){
+		Intent bindServiceIntent = new Intent(getActivity(), TimerService.class);
+		connection = new ServiceConnection() {
+			
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+				Log.d(tag, "service disconnected");
+				if(timerBinder != null){
+					timerBinder.unregisterActivity();
+				}
+				timerBinder = null;
+				isBound = false;
+			}
+			
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				Log.d(tag,"service connected!!");
+				timerBinder = (TimerBinder)service;
+				timerBinder.registerActivity(getActivity(), uiHandler);
+				isBound = true;
+			}
+		};
+		
+		
+		boolean isBindCall = getActivity().bindService(bindServiceIntent, connection, Service.BIND_AUTO_CREATE);
+		Log.d(tag,"is binding call successfully? : "+isBindCall);
+	
+	}
+	
+	
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		getActivity().unbindService(connection);
+	}
+	
+	
+	
+
+	
 	private void startTimer() {
 
 	}
