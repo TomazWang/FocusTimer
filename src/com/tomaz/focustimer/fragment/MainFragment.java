@@ -29,9 +29,10 @@ public class MainFragment extends Fragment {
 	private TimerStates state = TimerStates.RESET;
 
 	private ProgressWheel pw_spinner;
-	private Button btn_start;
-	private Button btn_pAndR;
-	private Button btn_stop;
+	private View btn_start;
+	private View btn_pAndR;
+	private View btn_done;
+	private View btn_discard;
 
 	private TextView txt_clock;
 
@@ -41,14 +42,11 @@ public class MainFragment extends Fragment {
 	private TimerStates timerStates = TimerStates.RESET;
 	private Sections nextSections = Sections.WORKING;
 
-	//--- service things
+	// --- service things
 	private TimerBinder timerBinder = null;
 	private ServiceConnection connection;
 	private boolean isBound = false;
-	
-	
-	
-	
+
 	private static final String tag = "MainFragment";
 
 	@Override
@@ -59,9 +57,10 @@ public class MainFragment extends Fragment {
 		pw_spinner = (ProgressWheel) view.findViewById(R.id.pw_spinner);
 		pw_spinner.setBarLength(0);
 
-		btn_pAndR = (Button) view.findViewById(R.id.btn_pauseAndResume);
-		btn_stop = (Button) view.findViewById(R.id.btn_stop);
-		btn_start = (Button) view.findViewById(R.id.btn_start);
+		btn_pAndR = view.findViewById(R.id.btn_pauseAndResume);
+		btn_done = view.findViewById(R.id.btn_done);
+		btn_start = view.findViewById(R.id.btn_start);
+		btn_discard = view.findViewById(R.id.btn_discard);
 
 		txt_clock = (TextView) view.findViewById(R.id.txt_clock);
 
@@ -82,30 +81,27 @@ public class MainFragment extends Fragment {
 				setClock(secRemain, secTotal);
 			}
 
-			
 			@Override
 			public Sections onTimeUp() {
 
 				timeUp();
 				return nextSections;
 			}
-			
-			
+
 			@Override
 			public void onDiscard() {
 				// TODO
 			}
-			
-			
-//			@Override
-//			public void stopClock() {
-//
-//				if (isRunning) {
-//					view_fNs.setVisibility(View.GONE);
-//					btn_start.setVisibility(View.VISIBLE);
-//					isRunning = false;
-//				}
-//			}
+
+			// @Override
+			// public void stopClock() {
+			//
+			// if (isRunning) {
+			// view_fNs.setVisibility(View.GONE);
+			// btn_start.setVisibility(View.VISIBLE);
+			// isRunning = false;
+			// }
+			// }
 
 			private void setClock(int secRemain, int secTotal) {
 
@@ -132,6 +128,8 @@ public class MainFragment extends Fragment {
 				MainActivity parent = (MainActivity) getActivity();
 
 				switch (v.getId()) {
+
+				// on click start
 				case R.id.btn_start:
 					view_fNs.setVisibility(View.VISIBLE);
 					btn_start.setVisibility(View.GONE);
@@ -139,42 +137,47 @@ public class MainFragment extends Fragment {
 					pw_spinner.spin();
 					break;
 
+				// on click pause or resume
 				case R.id.btn_pauseAndResume:
 
-					switch(timerStates){
-					
-					
+					switch (timerStates) {
+
 					case COUNTING:
 						pause();
 						pw_spinner.pauseSpinning();
-						btn_pAndR.setText("Resume");
+						((Button) btn_pAndR).setText("Resume");
+
 						break;
-						
-						
-						//TODO
+
+					case PAUSE:
+						resume();
+						((Button) btn_pAndR).setText("Pause");
+
+					default:
+						// not suppose to click this btn when RESET states
+						Log.w(tag,
+								"click pause/resume button while RESET states");
+						break;
 					}
-					
-				
-					
-					if (timerStates == TimerStates.COUNTING) {
-						// Pause
-					
-						isPauseing = true;
-					} else {
-						// Resume
-						parent.resumeTimer();
-						btn_pAndR.setText("Pause");
-						isPauseing = false;
-					}
+
 					break;
 
-				case R.id.btn_stop:
-					view_fNs.setVisibility(View.GONE);
-					btn_start.setVisibility(View.VISIBLE);
-					parent.stopTimer();
-					pw_spinner.stopSpinning();
-					txt_clock.setText("00 : 00");
-					isRunning = false;
+				// on click discard
+				// TODO
+
+				case R.id.btn_discard:
+					discard();
+					break;
+
+				// on click done
+				case R.id.btn_done:
+					done();
+					// view_fNs.setVisibility(View.GONE);
+					// btn_start.setVisibility(View.VISIBLE);
+					// parent.stopTimer();
+					// pw_spinner.stopSpinning();
+					// txt_clock.setText("00 : 00");
+					// isRunning = false;
 					break;
 
 				}
@@ -182,66 +185,66 @@ public class MainFragment extends Fragment {
 		};
 
 		btn_start.setOnClickListener(generalOnClickListener);
-		btn_stop.setOnClickListener(generalOnClickListener);
+		btn_done.setOnClickListener(generalOnClickListener);
 		btn_pAndR.setOnClickListener(generalOnClickListener);
-
+		btn_discard.setOnClickListener(generalOnClickListener);
 		return view;
 	}
 
-	
 	@Override
 	public void onResume() {
 		super.onResume();
 		bindService();
 	}
-	
-	private void bindService(){
+
+	private void bindService() {
 		Intent bindServiceIntent = new Intent(getActivity(), TimerService.class);
 		connection = new ServiceConnection() {
-			
+
 			@Override
 			public void onServiceDisconnected(ComponentName name) {
 				Log.d(tag, "service disconnected");
-				if(timerBinder != null){
+				if (timerBinder != null) {
 					timerBinder.unregisterActivity();
 				}
 				timerBinder = null;
 				isBound = false;
 			}
-			
+
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
-				Log.d(tag,"service connected!!");
-				timerBinder = (TimerBinder)service;
+				Log.d(tag, "service connected!!");
+				timerBinder = (TimerBinder) service;
 				timerBinder.registerActivity(getActivity(), uiHandler);
 				isBound = true;
 			}
 		};
-		
-		
-		boolean isBindCall = getActivity().bindService(bindServiceIntent, connection, Service.BIND_AUTO_CREATE);
-		Log.d(tag,"is binding call successfully? : "+isBindCall);
-	
+
+		boolean isBindCall = getActivity().bindService(bindServiceIntent,
+				connection, Service.BIND_AUTO_CREATE);
+		Log.d(tag, "is binding call successfully? : " + isBindCall);
+
 	}
-	
-	
-	
+
 	@Override
 	public void onPause() {
 		super.onPause();
 		getActivity().unbindService(connection);
 	}
-	
-	
-	
 
-	
 	private void startTimer() {
+		Log.i(tag, "start timer");
+		Intent startTimerIntent = new Intent(getActivity(), TimerService.class);
+		
 
+		Bundle bundle = new Bundle();
+		bundle.putInt(TimerService.KEY_TIMES_TO_COUNT, nextSections.getSec());
+		startTimerIntent.putExtras(bundle);
+		getActivity().startService(startTimerIntent);
 	}
 
 	private void stopTimer() {
-
+		
 	}
 
 	private void pause() {
@@ -275,4 +278,5 @@ public class MainFragment extends Fragment {
 			break;
 		}
 	}
+	
 }
