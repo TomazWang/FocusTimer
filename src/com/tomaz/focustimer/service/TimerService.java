@@ -66,6 +66,7 @@ public class TimerService extends Service {
 			Log.d(tag, "bundle is null");
 		}
 		startCount();
+		
 
 		return START_REDELIVER_INTENT;
 	}

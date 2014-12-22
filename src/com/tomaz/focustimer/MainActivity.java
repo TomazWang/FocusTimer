@@ -141,13 +141,13 @@ public class MainActivity extends Activity {
 
 	//
 	// public void startTimer(int sec) {
-	// Intent startServiceIntent = new Intent(MainActivity.this,
-	// TimerService.class);
-	//
-	// Bundle bundle = new Bundle();
-	// bundle.putInt(TimerService.KEY_TIMES_TO_COUNT, sec);
-	// startServiceIntent.putExtras(bundle);
-	// startService(startServiceIntent);
+//	 Intent startServiceIntent = new Intent(MainActivity.this,
+//	 TimerService.class);
+//	
+//	 Bundle bundle = new Bundle();
+//	 bundle.putInt(TimerService.KEY_TIMES_TO_COUNT, sec);
+//	 startServiceIntent.putExtras(bundle);
+//	 startService(startServiceIntent);
 	//
 	// }
 	//
