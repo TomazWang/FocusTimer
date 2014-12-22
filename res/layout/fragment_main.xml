@@ -59,7 +59,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
+            android:focusableInTouchMode="true"
             android:visibility="gone" >
+
+            <Button
+                android:id="@+id/btn_done"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DONE" />
 
             <Button
                 android:id="@+id/btn_pauseAndResume"
@@ -67,13 +75,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Pause" />
-
-            <Button
-                android:id="@+id/btn_stop"
+            
+              <Button
+                android:id="@+id/btn_discard"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Stop" />
+                android:text="Give Up" />
 
         </LinearLayout>
 
