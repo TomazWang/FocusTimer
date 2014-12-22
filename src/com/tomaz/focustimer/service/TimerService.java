@@ -95,6 +95,7 @@ public class TimerService extends Service {
 
 	public int stopCount() {
 		mainTimer.removeCallbacks(countingRunnable);
+		stopForeground(true);
 		return secToCount;
 	}
 
@@ -187,4 +188,18 @@ public class TimerService extends Service {
 		void onPause(int secRemain,int secTotal);
 		void onDiscard();
 	}
+
+	
+	// -- getter and setter
+	public TimerStates getTimerStates() {
+		return timerStates;
+	}
+
+	public void setTimerStates(TimerStates timerStates) {
+		this.timerStates = timerStates;
+	}
+	
+	
+	
+	
 }
