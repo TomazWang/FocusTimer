@@ -156,9 +156,9 @@ public class MainActivity extends Activity {
 	// }
 	//
 	// public void stopTimer() {
-	// timerService.stopCount();
-	// Intent stopServiceIntent = new Intent(MainActivity.this,
-	// TimerService.class);
+//	 timerService.stopCount();
+//	 Intent stopServiceIntent = new Intent(MainActivity.this,
+//	 TimerService.class);
 	//
 	// stopService(stopServiceIntent);
 	// // unbindService(connection);

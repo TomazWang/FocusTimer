@@ -28,26 +28,27 @@ public class MainFragment extends Fragment {
 
 	private TimerStates state = TimerStates.RESET;
 
-	private ProgressWheel pw_spinner;
-	private View btn_start;
-	private View btn_pAndR;
-	private View btn_done;
-	private View btn_discard;
-
-	private TextView txt_clock;
-
 	private View.OnClickListener generalOnClickListener;
 
-	private TimerCallBack uiHandler;
 	private TimerStates timerStates = TimerStates.RESET;
 	private Sections nextSections = Sections.WORKING;
 
 	// --- service things
+	private TimerCallBack uiHandler;
 	private TimerBinder timerBinder = null;
 	private ServiceConnection connection;
 	private boolean isBound = false;
 
 	private static final String tag = "MainFragment";
+
+	// --- widgets
+	private View view_fNs;
+	private ProgressWheel pw_spinner;
+	private View btn_start;
+	private View btn_pAndR;
+	private View btn_done;
+	private View btn_discard;
+	private TextView txt_clock;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -64,7 +65,7 @@ public class MainFragment extends Fragment {
 
 		txt_clock = (TextView) view.findViewById(R.id.txt_clock);
 
-		final View view_fNs = view.findViewById(R.id.view_fNs);
+		view_fNs = view.findViewById(R.id.view_fNs);
 
 		uiHandler = new TimerCallBack() {
 
@@ -110,7 +111,7 @@ public class MainFragment extends Fragment {
 				pw_spinner.pauseSpinning();
 
 				txt_clock.setText(calSecToMS(secRemain));
-				
+
 			}
 
 		};
@@ -120,16 +121,11 @@ public class MainFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 
-				MainActivity parent = (MainActivity) getActivity();
-
 				switch (v.getId()) {
 
 				// on click start
 				case R.id.btn_start:
-					view_fNs.setVisibility(View.VISIBLE);
-					btn_start.setVisibility(View.GONE);
 					startTimer();
-					pw_spinner.spin();
 					break;
 
 				// on click pause or resume
@@ -138,27 +134,21 @@ public class MainFragment extends Fragment {
 					switch (timerStates) {
 
 					case COUNTING:
+						// when pause click
 						pause();
-						pw_spinner.pauseSpinning();
-						((Button) btn_pAndR).setText("Resume");
-
 						break;
 
 					case PAUSE:
 						resume();
-						((Button) btn_pAndR).setText("Pause");
+						break;
 
 					default:
 						// not suppose to click this btn when RESET states
-						Log.w(tag,
-								"click pause/resume button while RESET states");
+						Log.w(tag, "click pause/resume btn while RESET states");
 						break;
 					}
 
 					break;
-
-				// on click discard
-				// TODO
 
 				case R.id.btn_discard:
 					discard();
@@ -167,12 +157,6 @@ public class MainFragment extends Fragment {
 				// on click done
 				case R.id.btn_done:
 					done();
-					// view_fNs.setVisibility(View.GONE);
-					// btn_start.setVisibility(View.VISIBLE);
-					// parent.stopTimer();
-					// pw_spinner.stopSpinning();
-					// txt_clock.setText("00 : 00");
-					// isRunning = false;
 					break;
 
 				}
@@ -211,6 +195,9 @@ public class MainFragment extends Fragment {
 				Log.d(tag, "service connected!!");
 				timerBinder = (TimerBinder) service;
 				timerBinder.registerActivity(getActivity(), uiHandler);
+				TimerStates ts = ((TimerService) timerBinder.getService())
+						.getTimerStates();
+				changeStates(ts);
 				isBound = true;
 			}
 		};
@@ -229,53 +216,115 @@ public class MainFragment extends Fragment {
 
 	private void startTimer() {
 		Log.i(tag, "start timer");
-		Intent startTimerIntent = new Intent(getActivity(), TimerService.class);
-		
 
+		// change states
+		changeStates(TimerStates.COUNTING);
+
+		// start timer service
+		Intent startTimerIntent = new Intent(getActivity(), TimerService.class);
 		Bundle bundle = new Bundle();
 		bundle.putInt(TimerService.KEY_TIMES_TO_COUNT, nextSections.getSec());
 		startTimerIntent.putExtras(bundle);
 		getActivity().startService(startTimerIntent);
+
 	}
 
 	private void stopTimer() {
+		Log.i(tag, "stop timer");
+
+		// change states
+		changeStates(TimerStates.RESET);
+
+		// stop timer service
+		((TimerService) timerBinder.getService()).stopCount();
+		Intent stopServiceIntent = new Intent(getActivity(), TimerService.class);
+		getActivity().stopService(stopServiceIntent);
+
+		// set next section in done() or discard()
 	}
 
 	private void pause() {
-
+		changeStates(TimerStates.PAUSE);
+		// TODO
 	}
 
 	private void resume() {
-
+		changeStates(TimerStates.COUNTING);
+		// TODO
 	}
 
 	private void done() {
-
+		stopTimer();
+		setNextSections(Sections.WORKING);
 	}
 
 	private void discard() {
+		// TODO
+		// - add AlertDialog
 
+		stopTimer();
+		setNextSections(Sections.WORKING);
 	}
 
 	private void timeUp() {
-
+		// change states
+		changeStates(TimerStates.RESET);
+		
+		// TODO
+		// - add AlerDialog
+		// to ask user to continue(either rest or next working section) or done
+		
+		
 	}
 
 	private void changeStates(TimerStates state) {
 		switch (state) {
 
 		case RESET:
+			view_fNs.setVisibility(View.GONE);
+			btn_start.setVisibility(View.VISIBLE);
+			
+			pw_spinner.stopSpinning();
+			txt_clock.setText("00 : 00");
 			break;
 		case COUNTING:
+			view_fNs.setVisibility(View.VISIBLE);
+			btn_start.setVisibility(View.GONE);
+			
+			pw_spinner.spin();
+			((Button) btn_pAndR).setText("Pause");
 			break;
 		case PAUSE:
+			view_fNs.setVisibility(View.VISIBLE);
+			btn_start.setVisibility(View.GONE);
+			
+			pw_spinner.pauseSpinning();
+			((Button) btn_pAndR).setText("Resume");
 			break;
 		}
+		setState(state);
 	}
-	
-	
-	public static String calSecToMS(int s){
-		
+
+	// -- getter and setter
+	public TimerStates getState() {
+		return state;
+	}
+
+	public void setState(TimerStates state) {
+		this.state = state;
+	}
+
+	public Sections getNextSections() {
+		return nextSections;
+	}
+
+	public void setNextSections(Sections nextSections) {
+		this.nextSections = nextSections;
+	}
+
+	// -- public method
+	public static String calSecToMS(int s) {
+
 		int min = s / 60;
 		int sec = s % 60;
 
@@ -284,4 +333,5 @@ public class MainFragment extends Fragment {
 
 		return (sMin + " : " + sSec);
 	}
+
 }
