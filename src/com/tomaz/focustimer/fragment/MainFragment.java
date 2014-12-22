@@ -109,13 +109,8 @@ public class MainFragment extends Fragment {
 				pw_spinner.setProgress(degree);
 				pw_spinner.pauseSpinning();
 
-				int min = secRemain / 60;
-				int sec = secRemain % 60;
-
-				String sMin = (min < 10) ? ("0" + min) : ("" + min);
-				String sSec = (sec < 10) ? ("0" + sec) : ("" + sec);
-
-				txt_clock.setText(sMin + " : " + sSec);
+				txt_clock.setText(calSecToMS(secRemain));
+				
 			}
 
 		};
@@ -244,7 +239,6 @@ public class MainFragment extends Fragment {
 	}
 
 	private void stopTimer() {
-		
 	}
 
 	private void pause() {
@@ -279,4 +273,15 @@ public class MainFragment extends Fragment {
 		}
 	}
 	
+	
+	public static String calSecToMS(int s){
+		
+		int min = s / 60;
+		int sec = s % 60;
+
+		String sMin = (min < 10) ? ("0" + min) : ("" + min);
+		String sSec = (sec < 10) ? ("0" + sec) : ("" + sec);
+
+		return (sMin + " : " + sSec);
+	}
 }

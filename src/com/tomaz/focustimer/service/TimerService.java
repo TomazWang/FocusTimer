@@ -4,12 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.tomaz.focustimer.exception.UIHandlerMissingException;
+import com.tomaz.focustimer.fragment.MainFragment;
 import com.tomaz.focustimer.other.Sections;
 import com.tomaz.focustimer.other.TimerStates;
 
 import android.app.Activity;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
@@ -40,6 +43,7 @@ public class TimerService extends Service {
 	private TimerStates timerStates = TimerStates.RESET;
 
 	private static final int FOREGROUND_NOTIFICATION_ID = 1;
+	private NotificationManager nManager;
 	
 	private Runnable countingRunnable = buildCountdownTimerRunnable();
 
@@ -83,7 +87,9 @@ public class TimerService extends Service {
 	 * === core timer functions ===================
 	 */
 	public void startCount() {
-		startForeground(FOREGROUND_NOTIFICATION_ID, buildForegroundNotification());
+		timerStates = TimerStates.COUNTING;
+		startForeground(FOREGROUND_NOTIFICATION_ID, buildForegroundNotification(timerStates,secToCount));
+		nManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 		countingRunnable.run();
 	}
 
@@ -110,6 +116,7 @@ public class TimerService extends Service {
 			if (callBack != null) {
 				callBack.onCounting(sec, secTotal);
 			}
+			nManager.notify(FOREGROUND_NOTIFICATION_ID,buildForegroundNotification(timerStates, secToCount));
 		}
 	}
 
@@ -137,14 +144,15 @@ public class TimerService extends Service {
 	}
 	
 	
-	private Notification buildForegroundNotification() {
+	private Notification buildForegroundNotification(TimerStates states,int remainSec) {
 		Notification.Builder builder = new Notification.Builder(this);
 		builder.setOngoing(true);
 
 		builder.setContentTitle("FocusTimer");
+		builder.setContentText(MainFragment.calSecToMS(remainSec));
 		builder.setSmallIcon(android.R.drawable.presence_busy);
 		builder.setTicker("Timer Running...");
-
+		
 		return builder.build();
 	}
 	
