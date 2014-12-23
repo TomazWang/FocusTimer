@@ -34,9 +34,9 @@ import android.os.Build;
 public class MainActivity extends Activity {
 
 	private int secToCount = 2 * 60;
-//	private TimerService timerService;
-//	private TimerBinder timerBinder;
-//	private ServiceConnection connection;
+	// private TimerService timerService;
+	// private TimerBinder timerBinder;
+	// private ServiceConnection connection;
 	private static final String tag = "MainActivity";
 
 	@Override
@@ -54,9 +54,9 @@ public class MainActivity extends Activity {
 	protected void onStop() {
 		super.onStop();
 		Log.d(tag, "on Stop");
-//		if (isBound) {
-//			unbindService(connection);
-//		}
+		// if (isBound) {
+		// unbindService(connection);
+		// }
 	}
 
 	@Override
@@ -94,102 +94,7 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-//	private boolean isBound = false;
-
-//	/**
-//	 * create and bind a TimerService and start the timer
-//	 * 
-//	 * @param sec
-//	 *            : total seconds to count
-//	 * @param uiHandler
-//	 *            : the TimerUIHandler to handle time change event
-//	 */
-//	public void bindTimerService() {
-//		Intent bindServiceIntent = new Intent(MainActivity.this,
-//				TimerService.class);
-//
-//		connection = new ServiceConnection() {
-//
-//			@Override
-//			public void onServiceDisconnected(ComponentName name) {
-//				Log.d(tag, "service disconnected");
-//				if (timerBinder != null) {
-//					timerBinder.unregisterActivity();
-//				}
-//				timerService = null;
-//				isBound = false;
-//			}
-//
-//			@Override
-//			public void onServiceConnected(ComponentName name, IBinder service) {
-//				Log.d(tag, "service connected");
-//				timerBinder = (TimerBinder) service;
-//				timerService = timerBinder.getService();
-//				isBound = true;
-//			}
-//		};
-//
-//		boolean isBindCall = this.bindService(bindServiceIntent, connection,
-//				BIND_AUTO_CREATE);
-//		Log.d(tag, "isBindcall :" + isBindCall);
-//
-//	}
-
-	/*
-	 * ==== timer control ============================
-	 */
-
-	//
-	// public void startTimer(int sec) {
-//	 Intent startServiceIntent = new Intent(MainActivity.this,
-//	 TimerService.class);
-//	
-//	 Bundle bundle = new Bundle();
-//	 bundle.putInt(TimerService.KEY_TIMES_TO_COUNT, sec);
-//	 startServiceIntent.putExtras(bundle);
-//	 startService(startServiceIntent);
-	//
-	// }
-	//
-	// public void startTimer() {
-	// startTimer(getSecToCount());
-	// }
-	//
-	// public void stopTimer() {
-//	 timerService.stopCount();
-//	 Intent stopServiceIntent = new Intent(MainActivity.this,
-//	 TimerService.class);
-	//
-	// stopService(stopServiceIntent);
-	// // unbindService(connection);
-	// }
-	//
-	// public void resumeTimer() {
-	// if (isBound) {
-	// timerService.startCount();
-	// } else {
-	// Log.e(tag, "Service not bound");
-	// }
-	// }
-	//
-	// /**
-	// * pause the TimerService and return remainSeconds
-	// *
-	// * @return remain sec
-	// */
-	// public int pauseTimer() {
-	// if (isBound) {
-	// return timerService.stopCount();
-	// } else {
-	// Log.e(tag, "Service not bound");
-	// }
-	// return -1;
-	// }
-	//
-
-	/*
-	 * ==== Getter and Setter ==================================
-	 */
+	// ==== Getter and Setter ==================================
 
 	public int getSecToCount() {
 		return secToCount;
@@ -198,7 +103,5 @@ public class MainActivity extends Activity {
 	public void setSecToCount(int secToCount) {
 		this.secToCount = secToCount;
 	}
-	
-	
 
 }
