@@ -26,8 +26,6 @@ import android.widget.TextView;
 
 public class MainFragment extends Fragment {
 
-	private TimerStates state = TimerStates.RESET;
-
 	private View.OnClickListener generalOnClickListener;
 
 	private TimerStates timerStates = TimerStates.RESET;
@@ -142,7 +140,7 @@ public class MainFragment extends Fragment {
 						resume();
 						break;
 
-					default:
+					case RESET:
 						// not suppose to click this btn when RESET states
 						Log.w(tag, "click pause/resume btn while RESET states");
 						break;
@@ -311,11 +309,11 @@ public class MainFragment extends Fragment {
 	
 	// -- getter and setter
 	public TimerStates getState() {
-		return state;
+		return timerStates;
 	}
 
 	public void setState(TimerStates state) {
-		this.state = state;
+		this.timerStates = state;
 	}
 
 	public Sections getNextSections() {
