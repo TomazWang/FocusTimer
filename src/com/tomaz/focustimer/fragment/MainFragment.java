@@ -233,7 +233,7 @@ public class MainFragment extends Fragment {
 		changeStates(TimerStates.RESET);
 
 		// stop timer service
-		timerBinder.getService().stopCount();
+		timerBinder.getService().stopCount(true);
 		Intent stopServiceIntent = new Intent(getActivity(), TimerService.class);
 		getActivity().stopService(stopServiceIntent);
 
@@ -242,13 +242,13 @@ public class MainFragment extends Fragment {
 
 	private void pause() {
 		changeStates(TimerStates.PAUSE);
-		timerBinder.getService().pauseTimer();
+		timerBinder.getService().stopCount(false);
 		// TODO
 	}
 
 	private void resume() {
 		changeStates(TimerStates.COUNTING);
-		timerBinder.getService().resumeTiemr();
+		timerBinder.getService().resumeCount();
 		// TODO
 	}
 

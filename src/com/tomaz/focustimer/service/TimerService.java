@@ -66,12 +66,11 @@ public class TimerService extends Service {
 		Log.d(tag, "onStartCommand");
 		Bundle bundle = intent.getExtras();
 		if (bundle != null) {
-			secTotal = bundle.getInt(KEY_TIMES_TO_COUNT);
-			resetTimer();
+			int secTotal = bundle.getInt(KEY_TIMES_TO_COUNT);
+			startNewCount(secTotal);
 		} else {
-			Log.d(tag, "bundle is null");
+			Log.e(tag, "bundle is null");
 		}
-		startCount();
 
 		return START_REDELIVER_INTENT;
 	}
@@ -86,36 +85,47 @@ public class TimerService extends Service {
 	/*
 	 * === core timer functions ===================
 	 */
-	public void startCount() {
-		timerStates = TimerStates.COUNTING;
+	public void startNewCount(int sec){
+		secTotal = sec;
+		secToCount = sec;
+		startNewCount();
+	}
+	
+	public void startNewCount() {
 		startForeground(FOREGROUND_NOTIFICATION_ID,
 				buildForegroundNotification(timerStates, secToCount));
 		nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		countingRunnable.run();
+		
+		// change states
+		setTimerStates(TimerStates.COUNTING);
 	}
 
-	public int stopCount() {
+	public int stopCount(boolean clearTimer) {
 		mainTimer.removeCallbacks(countingRunnable);
-		stopForeground(true);
+
+		if (!clearTimer) {
+			setTimerStates(TimerStates.PAUSE);
+		} else {
+			setTimerStates(TimerStates.RESET);
+			stopForeground(true);
+		}
 		return secToCount;
 	}
 
-	public void resetTimer() {
-		secToCount = secTotal;
+//	public void resetTimer() {
+//		secToCount = secTotal;
+//	}
+
+	public void resumeCount() {
+		countingRunnable.run();
+		setTimerStates(TimerStates.COUNTING);
 	}
 
-	public void pauseTimer(){
-		mainTimer.removeCallbacks(countingRunnable);
-	}
-	
-	public void resumeTiemr(){
-		countingRunnable.run();
-	}
-	
 	private void doWhenCountDown(int sec) {
 		if (sec <= 0) {
 			// times up
-			stopCount();
+			stopCount(true);
 			doAfterTimesUp();
 			if (callBack != null) {
 				callBack.onCounting(sec, secTotal);
@@ -132,11 +142,11 @@ public class TimerService extends Service {
 	}
 
 	private void doWhenPause() {
+		// TODO
 	}
 
 	private void doAfterTimesUp() {
 		// TODO
-		resetTimer();
 		Log.i(tag, "times up");
 	}
 
@@ -167,7 +177,7 @@ public class TimerService extends Service {
 				.setSmallIcon(android.R.drawable.presence_busy)
 				.setTicker("Timer Running...")
 				.setContentIntent(pendingStartMAIntent);
-		
+
 		return builder.build();
 	}
 
