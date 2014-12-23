@@ -72,6 +72,7 @@ public class TimerService extends Service {
 			Log.e(tag, "bundle is null");
 		}
 
+		
 		return START_REDELIVER_INTENT;
 	}
 
@@ -93,9 +94,6 @@ public class TimerService extends Service {
 
 	public void startNewCount() {
 
-		// start mainTimer
-		countingRunnable.run();
-
 		// change states
 		setTimerStates(TimerStates.COUNTING);
 
@@ -103,6 +101,9 @@ public class TimerService extends Service {
 		startForeground(FOREGROUND_NOTIFICATION_ID,
 				buildForegroundNotification(timerStates, secToCount));
 		nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		
+		// start mainTimer
+				countingRunnable.run();
 	}
 
 	public int stopCount(boolean clearTimer) {
@@ -118,6 +119,7 @@ public class TimerService extends Service {
 			startForeground(FOREGROUND_NOTIFICATION_ID,
 					buildForegroundNotification(timerStates, secToCount));
 			nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			callBack.onPause(secToCount, secTotal);
 		} else {
 			setTimerStates(TimerStates.RESET);
 		}
@@ -125,9 +127,6 @@ public class TimerService extends Service {
 	}
 
 	public void resumeCount() {
-		// resume timer
-		countingRunnable.run();
-		
 		// change states
 		setTimerStates(TimerStates.COUNTING);
 		
@@ -135,6 +134,9 @@ public class TimerService extends Service {
 		startForeground(FOREGROUND_NOTIFICATION_ID,
 				buildForegroundNotification(timerStates, secToCount));
 		nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		
+		// resume timer
+				countingRunnable.run();
 	}
 
 	private void doWhenCountDown(int sec) {
