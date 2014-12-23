@@ -193,8 +193,7 @@ public class MainFragment extends Fragment {
 				Log.d(tag, "service connected!!");
 				timerBinder = (TimerBinder) service;
 				timerBinder.registerActivity(getActivity(), uiHandler);
-				TimerStates ts = ((TimerService) timerBinder.getService())
-						.getTimerStates();
+				TimerStates ts = timerBinder.getService().getTimerStates();
 				changeStates(ts);
 				isBound = true;
 			}
@@ -234,7 +233,7 @@ public class MainFragment extends Fragment {
 		changeStates(TimerStates.RESET);
 
 		// stop timer service
-		((TimerService) timerBinder.getService()).stopCount();
+		timerBinder.getService().stopCount();
 		Intent stopServiceIntent = new Intent(getActivity(), TimerService.class);
 		getActivity().stopService(stopServiceIntent);
 
@@ -243,11 +242,13 @@ public class MainFragment extends Fragment {
 
 	private void pause() {
 		changeStates(TimerStates.PAUSE);
+		timerBinder.getService().pauseTimer();
 		// TODO
 	}
 
 	private void resume() {
 		changeStates(TimerStates.COUNTING);
+		timerBinder.getService().resumeTiemr();
 		// TODO
 	}
 
@@ -267,12 +268,11 @@ public class MainFragment extends Fragment {
 	private void timeUp() {
 		// change states
 		changeStates(TimerStates.RESET);
-		
+
 		// TODO
 		// - add AlerDialog
 		// to ask user to continue(either rest or next working section) or done
-		
-		
+
 	}
 
 	private void changeStates(TimerStates state) {
@@ -281,21 +281,21 @@ public class MainFragment extends Fragment {
 		case RESET:
 			view_fNs.setVisibility(View.GONE);
 			btn_start.setVisibility(View.VISIBLE);
-			
+
 			pw_spinner.stopSpinning();
 			txt_clock.setText("00 : 00");
 			break;
 		case COUNTING:
 			view_fNs.setVisibility(View.VISIBLE);
 			btn_start.setVisibility(View.GONE);
-			
+
 			pw_spinner.spin();
 			((Button) btn_pAndR).setText("Pause");
 			break;
 		case PAUSE:
 			view_fNs.setVisibility(View.VISIBLE);
 			btn_start.setVisibility(View.GONE);
-			
+
 			pw_spinner.pauseSpinning();
 			((Button) btn_pAndR).setText("Resume");
 			break;
@@ -303,10 +303,9 @@ public class MainFragment extends Fragment {
 		setState(state);
 	}
 
-
 	// -- SP method
 	// TODO save states in shared preference.
-	
+
 	// -- getter and setter
 	public TimerStates getState() {
 		return timerStates;

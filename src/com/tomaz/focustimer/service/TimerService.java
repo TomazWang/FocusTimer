@@ -104,6 +104,14 @@ public class TimerService extends Service {
 		secToCount = secTotal;
 	}
 
+	public void pauseTimer(){
+		mainTimer.removeCallbacks(countingRunnable);
+	}
+	
+	public void resumeTiemr(){
+		countingRunnable.run();
+	}
+	
 	private void doWhenCountDown(int sec) {
 		if (sec <= 0) {
 			// times up
