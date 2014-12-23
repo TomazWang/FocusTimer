@@ -85,41 +85,56 @@ public class TimerService extends Service {
 	/*
 	 * === core timer functions ===================
 	 */
-	public void startNewCount(int sec){
+	public void startNewCount(int sec) {
 		secTotal = sec;
 		secToCount = sec;
 		startNewCount();
 	}
-	
+
 	public void startNewCount() {
+
+		// start mainTimer
+		countingRunnable.run();
+
+		// change states
+		setTimerStates(TimerStates.COUNTING);
+
+		// start notification
 		startForeground(FOREGROUND_NOTIFICATION_ID,
 				buildForegroundNotification(timerStates, secToCount));
 		nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		countingRunnable.run();
-		
-		// change states
-		setTimerStates(TimerStates.COUNTING);
 	}
 
 	public int stopCount(boolean clearTimer) {
+
+		// stop notification
 		mainTimer.removeCallbacks(countingRunnable);
 
+		// change states
+		// change notification
+		stopForeground(true);
 		if (!clearTimer) {
 			setTimerStates(TimerStates.PAUSE);
+			startForeground(FOREGROUND_NOTIFICATION_ID,
+					buildForegroundNotification(timerStates, secToCount));
+			nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		} else {
 			setTimerStates(TimerStates.RESET);
-			stopForeground(true);
 		}
 		return secToCount;
 	}
 
-//	public void resetTimer() {
-//		secToCount = secTotal;
-//	}
-
 	public void resumeCount() {
+		// resume timer
 		countingRunnable.run();
+		
+		// change states
 		setTimerStates(TimerStates.COUNTING);
+		
+		// change notification
+		startForeground(FOREGROUND_NOTIFICATION_ID,
+				buildForegroundNotification(timerStates, secToCount));
+		nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
 	private void doWhenCountDown(int sec) {
@@ -164,6 +179,11 @@ public class TimerService extends Service {
 		return r;
 	}
 
+	/**
+	 * @param states
+	 * @param remainSec
+	 * @return
+	 */
 	private Notification buildForegroundNotification(TimerStates states,
 			int remainSec) {
 
@@ -175,8 +195,19 @@ public class TimerService extends Service {
 		builder.setOngoing(true).setContentTitle("FocusTimer")
 				.setContentText(MainFragment.calSecToMS(remainSec))
 				.setSmallIcon(android.R.drawable.presence_busy)
-				.setTicker("Timer Running...")
 				.setContentIntent(pendingStartMAIntent);
+
+		switch (states) {
+		case COUNTING:
+			builder.setTicker("Timer Counting...");
+			break;
+		case PAUSE:
+			builder.setTicker("Timer pause");
+			break;
+
+		case RESET:
+			break;
+		}
 
 		return builder.build();
 	}
