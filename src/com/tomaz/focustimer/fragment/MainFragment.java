@@ -305,6 +305,10 @@ public class MainFragment extends Fragment {
 		setState(state);
 	}
 
+
+	// -- SP method
+	// TODO save states in shared preference.
+	
 	// -- getter and setter
 	public TimerStates getState() {
 		return state;

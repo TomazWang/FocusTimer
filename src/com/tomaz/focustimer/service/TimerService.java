@@ -3,6 +3,7 @@ package com.tomaz.focustimer.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.tomaz.focustimer.MainActivity;
 import com.tomaz.focustimer.exception.UIHandlerMissingException;
 import com.tomaz.focustimer.fragment.MainFragment;
 import com.tomaz.focustimer.other.Sections;
@@ -11,6 +12,7 @@ import com.tomaz.focustimer.other.TimerStates;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -44,7 +46,7 @@ public class TimerService extends Service {
 
 	private static final int FOREGROUND_NOTIFICATION_ID = 1;
 	private NotificationManager nManager;
-	
+
 	private Runnable countingRunnable = buildCountdownTimerRunnable();
 
 	@Override
@@ -70,7 +72,6 @@ public class TimerService extends Service {
 			Log.d(tag, "bundle is null");
 		}
 		startCount();
-		
 
 		return START_REDELIVER_INTENT;
 	}
@@ -82,14 +83,14 @@ public class TimerService extends Service {
 		mainTimer.removeCallbacks(countingRunnable);
 	}
 
-	
 	/*
 	 * === core timer functions ===================
 	 */
 	public void startCount() {
 		timerStates = TimerStates.COUNTING;
-		startForeground(FOREGROUND_NOTIFICATION_ID, buildForegroundNotification(timerStates,secToCount));
-		nManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+		startForeground(FOREGROUND_NOTIFICATION_ID,
+				buildForegroundNotification(timerStates, secToCount));
+		nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		countingRunnable.run();
 	}
 
@@ -117,7 +118,8 @@ public class TimerService extends Service {
 			if (callBack != null) {
 				callBack.onCounting(sec, secTotal);
 			}
-			nManager.notify(FOREGROUND_NOTIFICATION_ID,buildForegroundNotification(timerStates, secToCount));
+			nManager.notify(FOREGROUND_NOTIFICATION_ID,
+					buildForegroundNotification(timerStates, secToCount));
 		}
 	}
 
@@ -130,7 +132,7 @@ public class TimerService extends Service {
 		Log.i(tag, "times up");
 	}
 
-	private Runnable buildCountdownTimerRunnable(){
+	private Runnable buildCountdownTimerRunnable() {
 		Runnable r = new Runnable() {
 
 			@Override
@@ -140,24 +142,26 @@ public class TimerService extends Service {
 				secToCount--;
 			}
 		};
-		
+
 		return r;
 	}
-	
-	
-	private Notification buildForegroundNotification(TimerStates states,int remainSec) {
-		Notification.Builder builder = new Notification.Builder(this);
-		builder.setOngoing(true);
 
-		builder.setContentTitle("FocusTimer");
-		builder.setContentText(MainFragment.calSecToMS(remainSec));
-		builder.setSmallIcon(android.R.drawable.presence_busy);
-		builder.setTicker("Timer Running...");
+	private Notification buildForegroundNotification(TimerStates states,
+			int remainSec) {
+
+		Intent startMAIntent = new Intent(this, MainActivity.class);
+		PendingIntent pendingStartMAIntent = PendingIntent.getActivity(this, 0,
+				startMAIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		Notification.Builder builder = new Notification.Builder(this);
+		builder.setOngoing(true).setContentTitle("FocusTimer")
+				.setContentText(MainFragment.calSecToMS(remainSec))
+				.setSmallIcon(android.R.drawable.presence_busy)
+				.setTicker("Timer Running...")
+				.setContentIntent(pendingStartMAIntent);
 		
 		return builder.build();
 	}
-	
-
 
 	public class TimerBinder extends Binder {
 
@@ -180,16 +184,17 @@ public class TimerService extends Service {
 
 	public interface TimerCallBack {
 		void onCounting(int secRemain, int secTotal);
-		
+
 		/**
 		 * @return next time section.
 		 */
 		Sections onTimeUp();
-		void onPause(int secRemain,int secTotal);
+
+		void onPause(int secRemain, int secTotal);
+
 		void onDiscard();
 	}
 
-	
 	// -- getter and setter
 	public TimerStates getTimerStates() {
 		return timerStates;
@@ -198,8 +203,5 @@ public class TimerService extends Service {
 	public void setTimerStates(TimerStates timerStates) {
 		this.timerStates = timerStates;
 	}
-	
-	
-	
-	
+
 }
