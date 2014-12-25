@@ -256,7 +256,7 @@ public class MainFragment extends Fragment {
 		setNextSections(Sections.WORKING);
 	}
 
-	private void timeUp() {
+	public void timeUp() {
 		// change states
 		changeStates(TimerStates.RESET);
 

@@ -11,6 +11,7 @@ import com.tomaz.focustimer.service.TimerService.TimerCallBack;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -36,7 +37,12 @@ public class MainActivity extends Activity {
 	private int secToCount = 2 * 60;
 	private static final String tag = "MainActivity";
 
-	// public static final int TODO
+	public static final String CALL_FORM_SERVICE = "CALL_FORM_SERVICE";
+	public static final int FLAG_NORMAL = 0;
+	public static final int FLAG_TIME_UP = 1;
+
+	// public static final int STATE_PAUSE = 2;
+	// public static final int STATE_STOP = 3;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +65,33 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-
 		Log.d(tag, "onResume");
 
+		Intent intentFromService = getIntent();
+		if (intentFromService != null) {
+			// Activity is call by someone
+
+			int flag = intentFromService.getIntExtra(CALL_FORM_SERVICE, -1);
+			if (flag >= 0) {
+				switch (flag) {
+				case FLAG_NORMAL:
+					break;
+				case FLAG_TIME_UP:
+					FragmentManager fm = getFragmentManager();
+					try{
+						MainFragment f = (MainFragment)fm.findFragmentById(R.id.container);
+						f.timeUp();
+					}catch (Exception e){
+						Log.e(tag,"Can't convert Fragment to MainFragment \n" +e.getMessage());
+					}
+						break;
+				default:
+					Log.w(tag, "flag != def num");
+				}
+			} else {
+				Log.w(tag, "flag <= 0");
+			}
+		}
 	}
 
 	@Override
