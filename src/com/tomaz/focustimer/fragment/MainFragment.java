@@ -92,15 +92,6 @@ public class MainFragment extends Fragment {
 				// TODO
 			}
 
-			// @Override
-			// public void stopClock() {
-			//
-			// if (isRunning) {
-			// view_fNs.setVisibility(View.GONE);
-			// btn_start.setVisibility(View.VISIBLE);
-			// isRunning = false;
-			// }
-			// }
 
 			private void setClock(int secRemain, int secTotal) {
 

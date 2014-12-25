@@ -197,6 +197,7 @@ public class TimerService extends Service {
 		builder.setOngoing(true).setContentTitle("FocusTimer")
 				.setContentText(MainFragment.calSecToMS(remainSec))
 				.setSmallIcon(android.R.drawable.presence_busy)
+				.setOnlyAlertOnce(true)
 				.setContentIntent(pendingStartMAIntent);
 
 		switch (states) {

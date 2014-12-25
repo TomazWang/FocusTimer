@@ -34,16 +34,16 @@ import android.os.Build;
 public class MainActivity extends Activity {
 
 	private int secToCount = 2 * 60;
-	// private TimerService timerService;
-	// private TimerBinder timerBinder;
-	// private ServiceConnection connection;
 	private static final String tag = "MainActivity";
+
+	// public static final int TODO
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		if (savedInstanceState == null) {
+			// total restart
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new MainFragment()).commit();
 		}
@@ -64,9 +64,7 @@ public class MainActivity extends Activity {
 		super.onResume();
 
 		Log.d(tag, "onResume");
-		// if (!isBound) {
-		// bindTimerService();
-		// }
+
 	}
 
 	@Override
