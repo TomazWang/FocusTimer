@@ -46,6 +46,7 @@ public class TimerService extends Service {
 
 	private static final int FOREGROUND_NOTIFICATION_ID = 1;
 	private NotificationManager nManager;
+	private Notification.Builder fNoteBuilder;
 
 	private Runnable countingRunnable = buildCountdownTimerRunnable();
 
@@ -72,7 +73,6 @@ public class TimerService extends Service {
 			Log.e(tag, "bundle is null");
 		}
 
-		
 		return START_REDELIVER_INTENT;
 	}
 
@@ -101,9 +101,9 @@ public class TimerService extends Service {
 		startForeground(FOREGROUND_NOTIFICATION_ID,
 				buildForegroundNotification(timerStates, secToCount));
 		nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		
+
 		// start mainTimer
-				countingRunnable.run();
+		countingRunnable.run();
 	}
 
 	public int stopCount(boolean clearTimer) {
@@ -129,14 +129,14 @@ public class TimerService extends Service {
 	public void resumeCount() {
 		// change states
 		setTimerStates(TimerStates.COUNTING);
-		
+
 		// change notification
 		startForeground(FOREGROUND_NOTIFICATION_ID,
 				buildForegroundNotification(timerStates, secToCount));
 		nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		
+
 		// resume timer
-				countingRunnable.run();
+		countingRunnable.run();
 	}
 
 	private void doWhenCountDown(int sec) {
@@ -193,26 +193,27 @@ public class TimerService extends Service {
 		PendingIntent pendingStartMAIntent = PendingIntent.getActivity(this, 0,
 				startMAIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		Notification.Builder builder = new Notification.Builder(this);
-		builder.setOngoing(true).setContentTitle("FocusTimer")
+		if (fNoteBuilder == null) {
+			fNoteBuilder = new Notification.Builder(this);
+		}
+		fNoteBuilder.setOngoing(true).setContentTitle("FocusTimer")
 				.setContentText(MainFragment.calSecToMS(remainSec))
 				.setSmallIcon(android.R.drawable.presence_busy)
-				.setOnlyAlertOnce(true)
-				.setContentIntent(pendingStartMAIntent);
+				.setOnlyAlertOnce(true).setContentIntent(pendingStartMAIntent);
 
 		switch (states) {
 		case COUNTING:
-			builder.setTicker("Timer Counting...");
+			fNoteBuilder.setTicker("Timer Counting...");
 			break;
 		case PAUSE:
-			builder.setTicker("Timer pause");
+			fNoteBuilder.setTicker("Timer pause");
 			break;
 
 		case RESET:
 			break;
 		}
 
-		return builder.build();
+		return fNoteBuilder.build();
 	}
 
 	public class TimerBinder extends Binder {
