@@ -54,9 +54,6 @@ public class MainActivity extends Activity {
 	protected void onStop() {
 		super.onStop();
 		Log.d(tag, "on Stop");
-		// if (isBound) {
-		// unbindService(connection);
-		// }
 	}
 
 	@Override
