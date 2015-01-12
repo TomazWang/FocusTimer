@@ -3,7 +3,7 @@ package com.tomaz.focustimer.fragment;
 import com.tomaz.focustimer.MainActivity;
 import com.tomaz.focustimer.R;
 import com.tomaz.focustimer.components.progressbar.ProgressWheel;
-import com.tomaz.focustimer.other.Sections;
+import com.tomaz.focustimer.other.Sessions;
 import com.tomaz.focustimer.other.TimerStates;
 import com.tomaz.focustimer.service.TimerService;
 import com.tomaz.focustimer.service.TimerService.TimerBinder;
@@ -29,7 +29,7 @@ public class MainFragment extends Fragment {
 	private View.OnClickListener generalOnClickListener;
 
 	private TimerStates timerStates = TimerStates.RESET;
-	private Sections nextSections = Sections.WORKING;
+	private Sessions nextSessions = Sessions.WORKING;
 
 	// --- service things
 	private TimerCallBack uiHandler;
@@ -81,10 +81,10 @@ public class MainFragment extends Fragment {
 			}
 
 			@Override
-			public Sections onTimeUp() {
+			public Sessions onTimeUp() {
 
 				timeUp();
-				return nextSections;
+				return nextSessions;
 			}
 
 			@Override
@@ -211,7 +211,7 @@ public class MainFragment extends Fragment {
 		// start timer service
 		Intent startTimerIntent = new Intent(getActivity(), TimerService.class);
 		Bundle bundle = new Bundle();
-		bundle.putInt(TimerService.KEY_TIMES_TO_COUNT, nextSections.getSec());
+		bundle.putInt(TimerService.KEY_TIMES_TO_COUNT, nextSessions.getSec());
 		startTimerIntent.putExtras(bundle);
 		getActivity().startService(startTimerIntent);
 
@@ -245,7 +245,7 @@ public class MainFragment extends Fragment {
 
 	private void done() {
 		stopTimer();
-		setNextSections(Sections.WORKING);
+		setNextSections(Sessions.WORKING);
 	}
 
 	private void discard() {
@@ -253,7 +253,7 @@ public class MainFragment extends Fragment {
 		// - add AlertDialog
 
 		stopTimer();
-		setNextSections(Sections.WORKING);
+		setNextSections(Sessions.WORKING);
 	}
 
 	public void timeUp() {
@@ -307,12 +307,12 @@ public class MainFragment extends Fragment {
 		this.timerStates = state;
 	}
 
-	public Sections getNextSections() {
-		return nextSections;
+	public Sessions getNextSections() {
+		return nextSessions;
 	}
 
-	public void setNextSections(Sections nextSections) {
-		this.nextSections = nextSections;
+	public void setNextSections(Sessions nextSections) {
+		this.nextSessions = nextSections;
 	}
 
 	// -- public method

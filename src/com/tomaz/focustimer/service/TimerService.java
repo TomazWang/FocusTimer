@@ -6,7 +6,7 @@ import java.util.Map;
 import com.tomaz.focustimer.MainActivity;
 import com.tomaz.focustimer.exception.UIHandlerMissingException;
 import com.tomaz.focustimer.fragment.MainFragment;
-import com.tomaz.focustimer.other.Sections;
+import com.tomaz.focustimer.other.Sessions;
 import com.tomaz.focustimer.other.TimerStates;
 
 import android.app.Activity;
@@ -241,7 +241,7 @@ public class TimerService extends Service {
 		/**
 		 * @return next time section.
 		 */
-		Sections onTimeUp();
+		Sessions onTimeUp();
 
 		void onPause(int secRemain, int secTotal);
 
