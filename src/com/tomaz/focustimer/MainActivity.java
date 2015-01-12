@@ -4,6 +4,7 @@ import com.tomaz.focustimer.R;
 import com.tomaz.focustimer.components.progressbar.ProgressWheel;
 import com.tomaz.focustimer.exception.UIHandlerMissingException;
 import com.tomaz.focustimer.fragment.MainFragment;
+import com.tomaz.focustimer.other.SPHelper;
 import com.tomaz.focustimer.service.TimerService;
 import com.tomaz.focustimer.service.TimerService.TimerBinder;
 import com.tomaz.focustimer.service.TimerService.TimerCallBack;
@@ -16,6 +17,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -32,17 +34,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.os.Build;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements SPHelper{
 
-	private int secToCount = 2 * 60;
+	// TODO secToCount set to 25 min default
+	private int secToCount = 15;  
 	private static final String tag = "MainActivity";
 
 	public static final String CALL_FORM_SERVICE = "CALL_FORM_SERVICE";
 	public static final int FLAG_NORMAL = 0;
 	public static final int FLAG_TIME_UP = 1;
-
-	// public static final int STATE_PAUSE = 2;
-	// public static final int STATE_STOP = 3;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +53,17 @@ public class MainActivity extends Activity {
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new MainFragment()).commit();
 		}
+		
+		
+		// -- reset sessions
+		SharedPreferences sessionRecord = getSharedPreferences(SP_NAME, MODE_PRIVATE);
+		
+		// reset to working session
+		sessionRecord.edit().putBoolean(KEY_isRest, false);
+		// reset to session 0
+		sessionRecord.edit().putInt(KEY_SessionID, 0);
+		// commit setting
+		sessionRecord.edit().commit();
 
 	}
 
@@ -92,6 +103,11 @@ public class MainActivity extends Activity {
 				Log.w(tag, "flag <= 0");
 			}
 		}
+		
+		
+		
+		
+		
 	}
 
 	@Override
