@@ -1,8 +1,10 @@
 package com.tomaz.focustimer.fragment;
 
+import com.tomaz.focustimer.FocusTimerApplication;
 import com.tomaz.focustimer.MainActivity;
 import com.tomaz.focustimer.R;
 import com.tomaz.focustimer.components.progressbar.ProgressWheel;
+import com.tomaz.focustimer.other.SPHelper;
 import com.tomaz.focustimer.other.Sessions;
 import com.tomaz.focustimer.other.TimerStates;
 import com.tomaz.focustimer.service.TimerService;
@@ -12,8 +14,10 @@ import com.tomaz.focustimer.service.TimerService.TimerCallBack;
 import android.app.Fragment;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -28,8 +32,12 @@ public class MainFragment extends Fragment {
 
 	private View.OnClickListener generalOnClickListener;
 
+	// timer states is for circle timer
 	private TimerStates timerStates = TimerStates.RESET;
+
+	// timer session tracker
 	private Sessions nextSessions = Sessions.WORKING;
+	private int sessionID = 0;
 
 	// --- service things
 	private TimerCallBack uiHandler;
@@ -69,14 +77,14 @@ public class MainFragment extends Fragment {
 
 			@Override
 			public void onCounting(int secRemain, int secTotal) {
-				changeStates(TimerStates.COUNTING);
+				changeTimerStates(TimerStates.COUNTING);
 				setClock(secRemain, secTotal);
 
 			}
 
 			@Override
 			public void onPause(int secRemain, int secTotal) {
-				changeStates(TimerStates.PAUSE);
+				changeTimerStates(TimerStates.PAUSE);
 				setClock(secRemain, secTotal);
 			}
 
@@ -91,7 +99,6 @@ public class MainFragment extends Fragment {
 			public void onDiscard() {
 				// TODO
 			}
-
 
 			private void setClock(int secRemain, int secTotal) {
 
@@ -185,7 +192,7 @@ public class MainFragment extends Fragment {
 				timerBinder = (TimerBinder) service;
 				timerBinder.registerActivity(getActivity(), uiHandler);
 				TimerStates ts = timerBinder.getService().getTimerStates();
-				changeStates(ts);
+				changeTimerStates(ts);
 				isBound = true;
 			}
 		};
@@ -202,16 +209,19 @@ public class MainFragment extends Fragment {
 		getActivity().unbindService(connection);
 	}
 
+	// ==== Timer Controls ===================================
+
 	private void startTimer() {
 		Log.i(tag, "start timer");
 
 		// change states
-		changeStates(TimerStates.COUNTING);
+		changeTimerStates(TimerStates.COUNTING);
 
 		// start timer service
 		Intent startTimerIntent = new Intent(getActivity(), TimerService.class);
 		Bundle bundle = new Bundle();
-		bundle.putInt(TimerService.KEY_TIMES_TO_COUNT, nextSessions.getSec());
+		bundle.putInt(TimerService.KEY_TIMES_TO_COUNT,
+				getSecToCount(nextSessions));
 		startTimerIntent.putExtras(bundle);
 		getActivity().startService(startTimerIntent);
 
@@ -221,52 +231,60 @@ public class MainFragment extends Fragment {
 		Log.i(tag, "stop timer");
 
 		// change states
-		changeStates(TimerStates.RESET);
+		changeTimerStates(TimerStates.RESET);
 
 		// stop timer service
 		timerBinder.getService().stopCount(true);
 		Intent stopServiceIntent = new Intent(getActivity(), TimerService.class);
 		getActivity().stopService(stopServiceIntent);
 
-		// set next section in done() or discard()
+		// set next session in done() or discard()
 	}
 
 	private void pause() {
-		changeStates(TimerStates.PAUSE);
+		changeTimerStates(TimerStates.PAUSE);
 		timerBinder.getService().stopCount(false);
-		// TODO
 	}
 
 	private void resume() {
-		changeStates(TimerStates.COUNTING);
+		changeTimerStates(TimerStates.COUNTING);
 		timerBinder.getService().resumeCount();
-		// TODO
 	}
 
 	private void done() {
-		stopTimer();
-		setNextSections(Sessions.WORKING);
+		// TODO record complete wrok
+		stop();
 	}
 
 	private void discard() {
 		// TODO
 		// - add AlertDialog
 
+		stop();
+
+	}
+
+	private void stop() {
 		stopTimer();
-		setNextSections(Sessions.WORKING);
+		setNextSections(getApp().timeSessionReset());
 	}
 
 	public void timeUp() {
+		stopTimer();
 		// change states
-		changeStates(TimerStates.RESET);
+		changeTimerStates(TimerStates.RESET);
 
 		// TODO
 		// - add AlerDialog
-		// to ask user to continue(either rest or next working section) or done
+		// to ask user to continue(either rest or next working session) or done
+		
+		// if countine
+		setNextSections(getApp().moveOn());
+		startTimer();
 
 	}
 
-	private void changeStates(TimerStates state) {
+	private void changeTimerStates(TimerStates state) {
 		switch (state) {
 
 		case RESET:
@@ -294,9 +312,25 @@ public class MainFragment extends Fragment {
 		setState(state);
 	}
 
-	// -- SP method
-	// TODO save states in shared preference.
-	
+	private int getSecToCount(Sessions s) {
+
+		int sec = 0;
+		// TODO get from sp
+		switch (s) {
+		case LONG_REST:
+			sec = 15;
+			break;
+		case SHORT_REST:
+			sec = 5;
+			break;
+		case WORKING:
+			sec = 20;
+			break;
+		}
+
+		return sec;
+
+	}
 
 	// -- getter and setter
 	public TimerStates getState() {
@@ -315,7 +349,11 @@ public class MainFragment extends Fragment {
 		this.nextSessions = nextSections;
 	}
 
-	// -- public method
+	private FocusTimerApplication getApp() {
+		return (FocusTimerApplication) getActivity().getApplication();
+	}
+
+	// -- tool method
 	public static String calSecToMS(int s) {
 
 		int min = s / 60;

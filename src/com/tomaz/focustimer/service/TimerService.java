@@ -43,7 +43,10 @@ public class TimerService extends Service {
 	private final Handler mainTimer = new Handler();
 
 	private TimerStates timerStates = TimerStates.RESET;
-
+	// private int sessionID = 0;
+	// private boolean isRest = false ;
+	
+	
 	private static final int FOREGROUND_NOTIFICATION_ID = 1;
 	private NotificationManager nManager;
 	private Notification.Builder fNoteBuilder;
@@ -82,18 +85,22 @@ public class TimerService extends Service {
 		Log.d(tag, "Service Destory");
 		mainTimer.removeCallbacks(countingRunnable);
 	}
+	
 
 	/*
 	 * === core timer functions ===================
 	 */
 	public void startNewCount(int sec) {
+		// 準備新的計時器
 		secTotal = sec;
 		secToCount = sec;
+		
+		// 開始計時
 		startNewCount();
 	}
 
+	// start a new counter by default settings.
 	public void startNewCount() {
-
 		// change states
 		setTimerStates(TimerStates.COUNTING);
 
@@ -106,6 +113,7 @@ public class TimerService extends Service {
 		countingRunnable.run();
 	}
 
+	// 停止計時器, 保留狀態
 	public int stopCount(boolean clearTimer) {
 
 		// stop notification
@@ -126,6 +134,7 @@ public class TimerService extends Service {
 		return secToCount;
 	}
 
+	// 繼續停止了的計時器
 	public void resumeCount() {
 		// change states
 		setTimerStates(TimerStates.COUNTING);
