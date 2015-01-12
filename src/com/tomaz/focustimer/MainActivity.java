@@ -34,7 +34,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.os.Build;
 
-public class MainActivity extends Activity implements SPHelper{
+public class MainActivity extends Activity{
 
 	private static final String tag = "MainActivity";
 
@@ -52,16 +52,6 @@ public class MainActivity extends Activity implements SPHelper{
 					.add(R.id.container, new MainFragment()).commit();
 		}
 		
-		
-		// -- reset sessions
-		SharedPreferences sessionRecord = getSharedPreferences(SP_NAME, MODE_PRIVATE);
-		
-		// reset to working session
-		sessionRecord.edit().putBoolean(KEY_isRest, false);
-		// reset to session 0
-		sessionRecord.edit().putInt(KEY_SessionID, 0);
-		// commit setting
-		sessionRecord.edit().commit();
 
 	}
 
