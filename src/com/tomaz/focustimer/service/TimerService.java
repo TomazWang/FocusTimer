@@ -174,6 +174,14 @@ public class TimerService extends Service {
 	private void doAfterTimesUp() {
 		// TODO
 		Log.i(tag, "times up");
+		if (callBack == null){
+			callBack.onTimeUp();
+		}else{
+			Intent intent = new Intent();
+			intent.setClass(this,MainActivity.class);
+			startActivity(intent);
+			// TODO 
+		}
 	}
 
 	private Runnable buildCountdownTimerRunnable() {
