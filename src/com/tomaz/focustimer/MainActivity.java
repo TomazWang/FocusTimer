@@ -36,8 +36,6 @@ import android.os.Build;
 
 public class MainActivity extends Activity implements SPHelper{
 
-	// TODO secToCount set to 25 min default
-	private int secToCount = 15;  
 	private static final String tag = "MainActivity";
 
 	public static final String CALL_FORM_SERVICE = "CALL_FORM_SERVICE";
@@ -135,14 +133,5 @@ public class MainActivity extends Activity implements SPHelper{
 		return super.onOptionsItemSelected(item);
 	}
 
-	// ==== Getter and Setter ==================================
-
-	public int getSecToCount() {
-		return secToCount;
-	}
-
-	public void setSecToCount(int secToCount) {
-		this.secToCount = secToCount;
-	}
 
 }
