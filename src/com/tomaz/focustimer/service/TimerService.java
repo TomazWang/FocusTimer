@@ -174,11 +174,14 @@ public class TimerService extends Service {
 	private void doAfterTimesUp() {
 		// TODO
 		Log.i(tag, "times up");
-		if (callBack == null){
+		if (MainActivity.isActive){
 			callBack.onTimeUp();
 		}else{
 			Intent intent = new Intent();
 			intent.setClass(this,MainActivity.class);
+			intent.putExtra(MainActivity.CALL_FORM_SERVICE, MainActivity.FLAG_TIME_UP);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			Log.d(tag, "before intent");
 			startActivity(intent);
 			// TODO 
 		}

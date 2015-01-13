@@ -41,6 +41,8 @@ public class MainActivity extends Activity{
 	public static final String CALL_FORM_SERVICE = "CALL_FORM_SERVICE";
 	public static final int FLAG_NORMAL = 0;
 	public static final int FLAG_TIME_UP = 1;
+	
+	public static boolean isActive = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,11 +57,6 @@ public class MainActivity extends Activity{
 
 	}
 
-	@Override
-	protected void onStop() {
-		super.onStop();
-		Log.d(tag, "on Stop");
-	}
 
 	@Override
 	protected void onResume() {
@@ -71,11 +68,14 @@ public class MainActivity extends Activity{
 			// Activity is call by someone
 
 			int flag = intentFromService.getIntExtra(CALL_FORM_SERVICE, -1);
+			Log.v(tag, "flag = "+flag);
 			if (flag >= 0) {
 				switch (flag) {
 				case FLAG_NORMAL:
+					// 0
 					break;
 				case FLAG_TIME_UP:
+					// 1
 					FragmentManager fm = getFragmentManager();
 					try{
 						MainFragment f = (MainFragment)fm.findFragmentById(R.id.container);
@@ -92,11 +92,23 @@ public class MainActivity extends Activity{
 			}
 		}
 		
-		
-		
-		
-		
+		isActive = true;
 	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.d(tag, "on Stop");
+	}
+
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		isActive = false;
+		Log.d(tag, "on Pause");
+	}
+	
 
 	@Override
 	protected void onDestroy() {
