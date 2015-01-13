@@ -11,10 +11,13 @@ import com.tomaz.focustimer.service.TimerService;
 import com.tomaz.focustimer.service.TimerService.TimerBinder;
 import com.tomaz.focustimer.service.TimerService.TimerCallBack;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.Fragment;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -278,9 +281,32 @@ public class MainFragment extends Fragment {
 		// - add AlerDialog
 		// to ask user to continue(either rest or next working session) or done
 		
+		AlertDialog.Builder dialogBuilder = new Builder(getActivity());
+		dialogBuilder.setMessage("Times up")
+					.setPositiveButton("Next", new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							setNextSections(getApp().moveOn());
+							startTimer();
+						}
+					})
+					.setNegativeButton("Stop", new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							stop();
+						}
+					});
+		
+		dialogBuilder.create().show();
+		
+		
 		// if countine
-		setNextSections(getApp().moveOn());
-		startTimer();
+		
+		// startTimer();
 
 	}
 
