@@ -34,41 +34,46 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.os.Build;
 
-public class MainActivity extends Activity{
+public class MainActivity extends Activity {
 
 	private static final String tag = "MainActivity";
 
 	public static final String CALL_FORM_SERVICE = "CALL_FORM_SERVICE";
 	public static final int FLAG_NORMAL = 0;
 	public static final int FLAG_TIME_UP = 1;
-	
+
 	public static boolean isActive = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.d(tag,"onCreate");
 		setContentView(R.layout.activity_main);
 		if (savedInstanceState == null) {
 			// total restart
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new MainFragment()).commit();
 		}
-		
 
 	}
 
-
+	@Override
+	protected void onStart() {
+		// TODO Auto-generated method stub
+		super.onStart();
+		Log.d(tag,"onStart");
+	}
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
 		Log.d(tag, "onResume");
-
 		Intent intentFromService = getIntent();
 		if (intentFromService != null) {
 			// Activity is call by someone
 
 			int flag = intentFromService.getIntExtra(CALL_FORM_SERVICE, -1);
-			Log.v(tag, "flag = "+flag);
+			Log.v(tag, "flag = " + flag);
 			if (flag >= 0) {
 				switch (flag) {
 				case FLAG_NORMAL:
@@ -77,13 +82,16 @@ public class MainActivity extends Activity{
 				case FLAG_TIME_UP:
 					// 1
 					FragmentManager fm = getFragmentManager();
-					try{
-						MainFragment f = (MainFragment)fm.findFragmentById(R.id.container);
+					try {
+						MainFragment f = (MainFragment) fm
+								.findFragmentById(R.id.container);
 						f.timeUp();
-					}catch (Exception e){
-						Log.e(tag,"Can't convert Fragment to MainFragment \n" +e.getMessage());
+					} catch (Exception e) {
+						Log.e(tag,
+								"Can't convert Fragment to MainFragment \n"
+										+ e.getMessage());
 					}
-						break;
+					break;
 				default:
 					Log.w(tag, "flag != def num");
 				}
@@ -91,10 +99,9 @@ public class MainActivity extends Activity{
 				Log.w(tag, "flag <= 0");
 			}
 		}
-		
 		isActive = true;
 	}
-	
+
 	@Override
 	protected void onStop() {
 		super.onStop();
@@ -108,7 +115,6 @@ public class MainActivity extends Activity{
 		isActive = false;
 		Log.d(tag, "on Pause");
 	}
-	
 
 	@Override
 	protected void onDestroy() {
@@ -134,6 +140,5 @@ public class MainActivity extends Activity{
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
 
 }
