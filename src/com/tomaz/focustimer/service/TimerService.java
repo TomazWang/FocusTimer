@@ -45,8 +45,7 @@ public class TimerService extends Service {
 	private TimerStates timerStates = TimerStates.RESET;
 	// private int sessionID = 0;
 	// private boolean isRest = false ;
-	
-	
+
 	private static final int FOREGROUND_NOTIFICATION_ID = 1;
 	private NotificationManager nManager;
 	private Notification.Builder fNoteBuilder;
@@ -85,7 +84,6 @@ public class TimerService extends Service {
 		Log.d(tag, "Service Destory");
 		mainTimer.removeCallbacks(countingRunnable);
 	}
-	
 
 	/*
 	 * === core timer functions ===================
@@ -94,7 +92,7 @@ public class TimerService extends Service {
 		// 準備新的計時器
 		secTotal = sec;
 		secToCount = sec;
-		
+
 		// 開始計時
 		startNewCount();
 	}
@@ -113,24 +111,24 @@ public class TimerService extends Service {
 		countingRunnable.run();
 	}
 
-	// 停止計時器, 保留狀態
-	public int stopCount(boolean clearTimer) {
+	// 停止計時器, 歸零
+	public int stopCount(boolean isBreakByTimeUp) {
 
-		// stop notification
 		mainTimer.removeCallbacks(countingRunnable);
+		stopForeground(!isBreakByTimeUp);
+		setTimerStates(TimerStates.RESET);
+		return secToCount;
+	}
 
-		// change states
-		// change notification
-		stopForeground(true);
-		if (!clearTimer) {
-			setTimerStates(TimerStates.PAUSE);
-			startForeground(FOREGROUND_NOTIFICATION_ID,
-					buildForegroundNotification(timerStates, secToCount));
-			nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			callBack.onPause(secToCount, secTotal);
-		} else {
-			setTimerStates(TimerStates.RESET);
-		}
+	// 暫停計時器, 保留狀態
+	public int pauseCount() {
+		mainTimer.removeCallbacks(countingRunnable);
+		setTimerStates(TimerStates.PAUSE);
+		startForeground(FOREGROUND_NOTIFICATION_ID,
+				buildForegroundNotification(timerStates, secToCount));
+		nManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		callBack.onPause(secToCount, secTotal);
+
 		return secToCount;
 	}
 
@@ -167,23 +165,16 @@ public class TimerService extends Service {
 		}
 	}
 
-	private void doWhenPause() {
-		// TODO
-	}
-
 	private void doAfterTimesUp() {
 		// TODO
 		Log.i(tag, "times up");
-		if (MainActivity.isActive){
-			callBack.onTimeUp();
-		}else{
-			Intent intent = new Intent();
-			intent.setClass(this,MainActivity.class);
-			intent.putExtra(MainActivity.CALL_FORM_SERVICE, MainActivity.FLAG_TIME_UP);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			Log.d(tag, "before intent");
-			startActivity(intent);
-			// TODO 
+		nManager.notify(FOREGROUND_NOTIFICATION_ID,
+				buildTimeUpAlertNotification());
+
+		if (MainActivity.isActive) {
+			if (callBack != null) {
+				callBack.onTimeUp();
+			}
 		}
 	}
 
@@ -232,6 +223,52 @@ public class TimerService extends Service {
 		case RESET:
 			break;
 		}
+
+		return fNoteBuilder.build();
+	}
+
+	private Notification buildTimeUpAlertNotification() {
+
+		// build Keep Counting intent
+
+		Intent keepCountingIntent = new Intent();
+		keepCountingIntent.setClass(this, MainActivity.class);
+		keepCountingIntent.putExtra(MainActivity.CALL_FORM_SERVICE,
+				MainActivity.FLAG_KEEP_COUNTING);
+		PendingIntent pendingKeepCountingIntent = PendingIntent.getActivity(
+				this, 0, keepCountingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		// build Stop intent
+		Intent stopCountingIntent = new Intent();
+		stopCountingIntent.setClass(this, MainActivity.class);
+		stopCountingIntent.putExtra(MainActivity.CALL_FORM_SERVICE,
+				MainActivity.FLAG_STOP_COUNTING);
+		PendingIntent pendingStopCountingIntent = PendingIntent.getActivity(
+				this, 0, stopCountingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		// build Done intent
+		Intent doneIntent = new Intent();
+		doneIntent.setClass(this, MainActivity.class);
+		doneIntent.putExtra(MainActivity.CALL_FORM_SERVICE,
+				MainActivity.FLAG_DONE);
+		PendingIntent pendingDoneIntent = PendingIntent.getActivity(this, 0,
+				doneIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		// build notification
+		if (fNoteBuilder == null) {
+			fNoteBuilder = new Notification.Builder(this);
+		}
+		fNoteBuilder
+				.setOngoing(true)
+				.setContentTitle("FocusTimer")
+				.setContentText("Time's Up")
+				.setSmallIcon(android.R.drawable.presence_audio_online)
+				.addAction(android.R.drawable.ic_media_play, "Keep",
+						pendingKeepCountingIntent)
+				.addAction(android.R.drawable.ic_lock_idle_lock, "Stop",
+						pendingStopCountingIntent)
+				.addAction(android.R.drawable.ic_menu_save, "Done",
+						pendingDoneIntent);
 
 		return fNoteBuilder.build();
 	}
