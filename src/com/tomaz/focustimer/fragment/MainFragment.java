@@ -230,23 +230,24 @@ public class MainFragment extends Fragment {
 
 	}
 
-	private void stopTimer() {
+	private void stopTimer(boolean isBreakByTimeUp) {
 		Log.i(tag, "stop timer");
 
 		// change states
 		changeTimerStates(TimerStates.RESET);
 
 		// stop timer service
-		timerBinder.getService().stopCount(true);
-		Intent stopServiceIntent = new Intent(getActivity(), TimerService.class);
-		getActivity().stopService(stopServiceIntent);
-
+		timerBinder.getService().stopCount(isBreakByTimeUp);
+		if(!isBreakByTimeUp){
+			Intent stopServiceIntent = new Intent(getActivity(), TimerService.class);
+			getActivity().stopService(stopServiceIntent);
+		}
 		// set next session in done() or discard()
 	}
 
 	private void pause() {
 		changeTimerStates(TimerStates.PAUSE);
-		timerBinder.getService().stopCount(false);
+		timerBinder.getService().pauseCount();
 	}
 
 	private void resume() {
@@ -268,12 +269,12 @@ public class MainFragment extends Fragment {
 	}
 
 	private void stop() {
-		stopTimer();
+		stopTimer(false);
 		setNextSections(getApp().timeSessionReset());
 	}
 
 	public void timeUp() {
-		stopTimer();
+		stopTimer(true);
 		// change states
 		changeTimerStates(TimerStates.RESET);
 
