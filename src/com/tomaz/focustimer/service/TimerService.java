@@ -236,7 +236,7 @@ public class TimerService extends Service {
 		keepCountingIntent.putExtra(MainActivity.CALL_FORM_SERVICE,
 				MainActivity.FLAG_KEEP_COUNTING);
 		PendingIntent pendingKeepCountingIntent = PendingIntent.getActivity(
-				this, 0, keepCountingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+				this, MainActivity.FLAG_KEEP_COUNTING, keepCountingIntent, PendingIntent.FLAG_ONE_SHOT);
 
 		// build Stop intent
 		Intent stopCountingIntent = new Intent();
@@ -244,15 +244,15 @@ public class TimerService extends Service {
 		stopCountingIntent.putExtra(MainActivity.CALL_FORM_SERVICE,
 				MainActivity.FLAG_STOP_COUNTING);
 		PendingIntent pendingStopCountingIntent = PendingIntent.getActivity(
-				this, 0, stopCountingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+				this, MainActivity.FLAG_STOP_COUNTING, stopCountingIntent, PendingIntent.FLAG_ONE_SHOT);
 
 		// build Done intent
 		Intent doneIntent = new Intent();
 		doneIntent.setClass(this, MainActivity.class);
 		doneIntent.putExtra(MainActivity.CALL_FORM_SERVICE,
 				MainActivity.FLAG_DONE);
-		PendingIntent pendingDoneIntent = PendingIntent.getActivity(this, 0,
-				doneIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent pendingDoneIntent = PendingIntent.getActivity(this, MainActivity.FLAG_DONE,
+				doneIntent, PendingIntent.FLAG_ONE_SHOT);
 
 		// build notification
 		if (fNoteBuilder == null) {
