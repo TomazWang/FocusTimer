@@ -41,6 +41,9 @@ public class MainActivity extends Activity {
 	public static final String CALL_FORM_SERVICE = "CALL_FORM_SERVICE";
 	public static final int FLAG_NORMAL = 0;
 	public static final int FLAG_TIME_UP = 1;
+	public static final int FLAG_KEEP_COUNTING = 2;
+	public static final int FLAG_STOP_COUNTING = 3;
+	public static final int FLAG_DONE = 4;
 
 	public static boolean isActive = false;
 
@@ -92,6 +95,15 @@ public class MainActivity extends Activity {
 										+ e.getMessage());
 					}
 					break;
+				case FLAG_KEEP_COUNTING:
+					Log.d(tag,"call MA keep counting");
+					break;
+				case FLAG_STOP_COUNTING:
+					Log.d(tag,"call MA stop counting");
+					break;
+				case FLAG_DONE:
+					Log.d(tag,"call MA done");
+					break;
 				default:
 					Log.w(tag, "flag != def num");
 				}
@@ -141,4 +153,13 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	
+	@Override
+	protected void onNewIntent(Intent newIntent) {
+		// TODO Auto-generated method stub
+		super.onNewIntent(newIntent);
+		setIntent(newIntent);
+	}
+	
+	
 }
